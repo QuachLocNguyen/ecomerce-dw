@@ -1,5 +1,5 @@
 -- =====================================================================
--- FILE: 04_Streaming_Setup.sql
+-- FILE: 02_Streaming_Setup.sql
 -- MỤC ĐÍCH: Thiết lập cơ chế Near Real-Time Streaming (Micro-Batch)
 -- ĐẶC TÍNH:
 --   1. Bảng đệm stg_sales_stream (buffer nhận sự kiện từ Python Producer)

@@ -38,41 +38,57 @@ This DWH is designed to answer **3 core business questions** that drive real ope
 ---
 
 ### ❓ BQ1 — Does discounting destroy profit margins?
-> *"Which discount tiers (0%, 1-10%, 11-25%, 26-50%, >50%) still produce positive contribution margin — and which are eroding profitability?"*
+> *"Which product categories are most vulnerable to margin erosion from discounts — and where can we safely expand promotional budgets?"*
 
-**Decision supported:** Should we continue deep-discount campaigns (>50%)? Which product categories are most vulnerable to margin erosion?
+**Queries:** `03_Queries_SQL.sql` (BQ1) · `04_Queries_MDX.mdx` (BQ1)
 
-**Queries:** `03_Queries_SQL.sql` → BQ1-A, BQ1-B · `04_Queries_MDX.mdx` → MDX BQ1-A, BQ1-B, BQ1-C
+![BQ1 - Margin vs Discount by Category](docs/screenshots/bq1.png)
 
-<!-- 📸 Chèn ảnh kết quả query BQ1-A: bảng Discount Tier vs Margin Rate % -->
-<!-- Ví dụ: nhóm >50% có margin_rate_pct thấp nhất → chứng minh giảm giá sâu không hiệu quả -->
-<!-- ![BQ1 - Discount vs Margin](docs/screenshots/bq1_discount_margin.png) -->
+#### 📊 Business Insights & Decisions:
+1. **Ngành hàng "chảy máu" lợi nhuận nhiều nhất — Electronics:**
+   - **Thực trạng:** Chiếm doanh thu lớn nhất toàn sàn (**$39.3M**) và nhận lượng chiết khấu khổng lồ (**$7.59M**), nhưng **Margin Rate lại thấp nhất toàn hệ thống (chỉ 34.46%)**.
+   - **Quyết định kinh doanh (Actionable Decision):** Cần siết chặt ngay các chương trình giảm giá sâu (>20%) đối với nhóm Điện tử vì chiết khấu cao đang bào mòn trực tiếp vào lợi nhuận gộp mà không đem lại biên lãi tương xứng.
+2. **Ngành hàng "bảo chứng" lợi nhuận cao nhất — Books & Media, Grocery, Toys & Games:**
+   - Đều duy trì được biên lợi nhuận vượt trội **> 51% – 52%** dù áp dụng mức chiết khấu trung bình.
+   - **Quyết định kinh doanh (Actionable Decision):** Mở rộng ngân sách khuyến mãi và các gói combo ưu đãi cho các ngành hàng này để kích cầu tăng trưởng doanh thu mà không lo sụt giảm biên lãi.
 
 ---
 
-### ❓ BQ2 — Which customers are worth keeping? (RFM + CLV + Churn Risk)
-> *"At the latest monthly snapshot: which Platinum/Gold customers have high CLV but haven't purchased in 90+ days (churn risk)?"*
+### ❓ BQ2 — Which customers are worth keeping? (Customer Health & Churn Risk)
+> *"What is the churn risk and Customer Lifetime Value (CLV) distribution across Customer Segments at the latest monthly snapshot?"*
 
-**Decision supported:** Which loyalty tier needs an immediate retention campaign? How to allocate the retention budget across Bronze → Platinum tiers?
+**Queries:** `03_Queries_SQL.sql` (BQ2) · `04_Queries_MDX.mdx` (BQ2)
 
-**Queries:** `03_Queries_SQL.sql` → BQ2-A, BQ2-B · `04_Queries_MDX.mdx` → MDX BQ2-A, BQ2-B, BQ2-C
+![BQ2 - Customer Segment Churn Risk & CLV](docs/screenshots/bq2.png)
 
-<!-- 📸 Chèn ảnh kết quả query BQ2-A: bảng Loyalty Tier × Churn Risk % × Avg CLV USD -->
-<!-- ![BQ2 - Churn Risk by Loyalty Tier](docs/screenshots/bq2_churn_clv.png) -->
+#### 📊 Business Insights & Decisions:
+1. **Tình trạng sức khỏe tệp khách hàng:**
+   - Hệ thống khách hàng cực kỳ khỏe mạnh — Điểm **Avg RFM Score đạt tuyệt đối 5.0**, tần suất quay lại mua hàng rất nhanh (**Avg Recency chỉ ~14.5 ngày** $\ll$ ngưỡng báo động 90 ngày) $\rightarrow$ Tỷ lệ **Churn Risk = 0%**.
+2. **Giá trị vòng đời (CLV):**
+   - Phân khúc **Consumer** mang lại giá trị trọn đời cao nhất (**$4,249.50/khách**), kế tiếp là **Corporate ($4,215.29)** và **Home Office ($4,192.90)**.
+   - **Quyết định kinh doanh (Actionable Decision):** Tập trung nguồn lực chăm sóc và ưu đãi đặc quyền cho tệp Consumer để tối đa hóa LTV, đồng thời xây dựng chính sách mua buôn/chiết khấu hóa đơn lớn cho Corporate.
 
 ---
 
 ### ❓ BQ3 — Which marketing channel has the best ROI?
-> *"Comparing Customer Acquisition Cost (CAC) vs First-Order Net Revenue by channel — which channel acquires the most valuable customers at the lowest cost?"*
+> *"Comparing Customer Acquisition Cost (CAC) vs First-Order Net Revenue by channel — which channel delivers sustainable ROI, and which is bleeding budget?"*
 
-**Decision supported:** Where to shift next month's marketing budget? Which channel type (Paid Media / Owned / Organic) delivers sustainable ROI?
+**Queries:** `03_Queries_SQL.sql` (BQ3) · `04_Queries_MDX.mdx` (BQ3)
 
-**Queries:** `03_Queries_SQL.sql` → BQ3-A, BQ3-B · `04_Queries_MDX.mdx` → MDX BQ3-A, BQ3-B, BQ3-C
+![BQ3 - Marketing ROI by Channel](docs/screenshots/bq3.png)
 
-<!-- 📸 Chèn ảnh kết quả query BQ3-A: bảng Marketing Channel × CAC × ROI Ratio -->
-<!-- ![BQ3 - Marketing ROI by Channel](docs/screenshots/bq3_marketing_roi.png) -->
+#### 📊 Business Insights & Decisions:
+1. **Kênh sinh lời vượt trội (Top ROI ~31x):**
+   - **Referral (31.02x)**, **Facebook Ads (30.94x)**, **Affiliate (30.87x)** và **Organic Search (30.74x)** là các kênh hiệu quả nhất.
+   - Chi phí để thu hút 1 khách mới (**Avg CAC**) rất tối ưu ở mức **~$40.00**, nhưng giá trị đơn hàng đầu tiên họ chi tiêu lại lên đến **~$1,240+**.
+2. **Phát hiện kênh gây lãng phí ngân sách lớn — `nothing special but works`:**
+   - **Thực trạng:** Chi phí bỏ ra để kéo khách vẫn là **$40.24/khách** (tiêu tốn gần $90,000 ngân sách), nhưng khách mang về chỉ mua đơn trung bình **$21.52**!
+   - **Hậu quả:** **ROI Ratio chỉ đạt 0.53x** (tức là bỏ ra $1 chỉ thu về $0.53 $\rightarrow$ **thua lỗ -47% ngay tại đơn đầu tiên**).
+   - **Quyết định kinh doanh (Actionable Decision):** Cắt bỏ ngay lập tức ngân sách rót vào kênh này để tái phân bổ sang **Referral** và **Facebook Ads**.
 
 ---
+
+## Data Scale
 
 
 
@@ -112,8 +128,8 @@ Architected a 5-container SSIS package with parallel CSV ingestion, SCD Type 2 c
 | **C04 — Load Facts** | 7× Fact SP with TRY…CATCH isolation | **Parallel** |
 | **C05 — Close** | Update watermark → Close batch SUCCESS | Sequential |
 
-<!-- 📸 Chèn ảnh SSIS Package (tất cả containers xanh lá sau khi chạy xong) -->
-<!-- ![SSIS ETL Pipeline](docs/screenshots/ssis_package_success.png) -->
+![SSIS ETL Pipeline Containers 00-02](docs/screenshots/ssis_success_012.png)
+![SSIS ETL Pipeline Containers 03-05](docs/screenshots/ssis_success_345.png)
 
 ### 3. Multi-Currency Support
 
@@ -130,8 +146,7 @@ Architected a 5-container SSIS package with parallel CSV ingestion, SCD Type 2 c
 | **Hanh vi Khach hang** | Fact_Feedback, Fact_Acquisition, Fact_Snapshot | `Average CAC USD`, `Negative Review Rate %`, `Points Redemption Rate %` |
 | **Tong hop Audit** | All 7 facts | Base measures — cross-fact reconciliation |
 
-<!-- 📸 Chèn ảnh SSAS Cube Browser hoặc Excel PivotTable kết nối đến cube -->
-<!-- ![SSAS Cube Browser](docs/screenshots/ssas_cube_browser.png) -->
+![SSAS Cubes Solution](docs/screenshots/ssas_success.png)
 
 ### 5. Near Real-Time Streaming Layer
 
@@ -146,8 +161,7 @@ stream_producer.py          stg_sales_stream          sp_Consume_MicroBatch
                                                       • SQL Agent Job: every 30s
 ```
 
-<!-- 📸 Chèn ảnh terminal Python hiển thị throughput (rows/sec) -->
-<!-- ![Stream Producer Output](docs/screenshots/stream_producer_output.png) -->
+![Near Real-Time Streaming Producer Output](docs/screenshots/pystream.png)
 
 ---
 
@@ -157,7 +171,7 @@ stream_producer.py          stg_sales_stream          sp_Consume_MicroBatch
 ecomdw/
 ├── 00_Create_Staging_Tables.sql    # Staging DDL — 4 stg_* buffer tables
 ├── 01_Create_EcommerceDW_v2.sql    # DWH DDL — 9 Dims + 7 Facts + ETL metadata
-├── 02_Streaming_Setup.sql          # Streaming DDL — buffer table + SP + watermark
+├── 04_Streaming_Setup.sql          # Streaming DDL — buffer table + SP + watermark
 ├── stream_producer.py              # Python micro-batch event producer
 ├── stream_consumer.py              # Python consumer / monitor
 ├── du_lieu_csv/                    # Source data (4 CSV files)
@@ -185,15 +199,10 @@ ecomdw/
 # 1. Create DWH schema (run in SSMS in order)
 #    00_Create_Staging_Tables.sql
 #    01_Create_EcommerceDW_v2.sql
+#    04_Streaming_Setup.sql
+erceDW_v2.sql
 #    02_Streaming_Setup.sql
-
-# 2. Run ETL pipeline
-#    Open SSIS_ETL_Project → Visual Studio → Run Package (F5)
-
-# 3. Deploy SSAS Cubes
-#    Open SSAS_OLAP_Project → Build → Deploy → Process Full
-
-# 4. Run streaming simulator
+ simulator
 pip install pyodbc
 python stream_producer.py --batch-size 100 --delay 0.5
 
@@ -246,6 +255,6 @@ FROM [Doanh Thu Ban Hang];
 
 ## Dataset
 
-Source: [Kaggle — E-Commerce Sales & Customer Analytics](https://www.kaggle.com) *(update link here)*
+Source: [Kaggle — E-Commerce Sales & Customer Analytics](https://www.kaggle.com/datasets/datascikhan/e-commerce-sales-and-customer-analytics)
 
 > 138,117 orders · 397,482 line-items · 25,000 customers · 1,175 products · 2021–2025 · 7 countries · 7 currencies

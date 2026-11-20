@@ -1,170 +1,79 @@
-/* =====================================================================
+﻿/* =====================================================================
    03_Queries_SQL.sql
    HỆ THỐNG TRUY VẤN PHÂN TÍCH KINH DOANH TRÊN DATA WAREHOUSE (EcommerceDW)
-   Đáp ứng tiêu chí đánh giá Tiêu chí 5 (Rubric DWH - 15 Điểm)
    Mô hình: Galaxy Schema (9 Dimensions + 7 Fact Tables)
 
-   ★ 3 CÂU HỎI NGHIỆP VỤ TRỌNG TÂM ★
-   BQ1 (Q2):  Discount Rate  → Contribution Margin  (Profitability)
-   BQ2 (Q12): Churn Risk + RFM + CLV                (Customer Retention)
-   BQ3 (Q11): CAC vs First-Order Revenue by Channel  (Marketing ROI)
+   ★ PHẦN 0: 3 CÂU HỎI NGHIỆP VỤ TRỌNG TÂM (BIG BUSINESS QUESTIONS) ★
+   - BQ1: Margin Rate vs Discount Rate by Category (Profitability)
+   - BQ2: Customer Health, Churn Risk & CLV by Segment (Retention)
+   - BQ3: CAC vs First-Order Revenue & ROI by Channel (Marketing ROI)
+
+   ★ PHẦN 1 - 7: 15 CÂU TRUY VẤN NGHIỆP VỤ CHUYÊN SÂU THEO RUBRIC (Q1 - Q15) ★
    ===================================================================== */
 
 USE EcommerceDW;
 GO
 
 -- =====================================================================
--- ★ BIG QUESTION 1: Chiết khấu có đang PHÁ MARGIN không?
---   Discount Rate → Contribution Margin (Profitability Analysis)
---   Decision: Có nên tiếp tục chương trình giảm giá sâu (>50%) không?
+-- BQ1: Chiết khấu có đang bào mòn biên lợi nhuận không? (Profitability by Category)
+-- Fact: Fact_Sales | Dim: Dim_Product
 -- =====================================================================
-
--- BQ1-A: Margin theo từng ngưỡng Discount (tóm tắt tác động)
-WITH DiscountImpact AS (
-    SELECT
-        CASE
-            WHEN fs.gross_sales = 0                              THEN '0% Free'
-            WHEN (fs.discount_amount / fs.gross_sales) = 0      THEN '0% No Discount'
-            WHEN (fs.discount_amount / fs.gross_sales) <= 0.10  THEN '01%-10%'
-            WHEN (fs.discount_amount / fs.gross_sales) <= 0.25  THEN '11%-25%'
-            WHEN (fs.discount_amount / fs.gross_sales) <= 0.50  THEN '26%-50%'
-            ELSE                                                      '>50% Deep Sale'
-        END AS discount_tier,
-        fs.gross_sales,
-        fs.discount_amount,
-        fs.net_revenue,
-        fs.contribution_margin
-    FROM dbo.Fact_Sales fs
-)
-SELECT
-    discount_tier,
-    COUNT(*)                                                            AS order_lines,
-    SUM(gross_sales)                                                    AS total_gross_sales,
-    SUM(discount_amount)                                                AS total_discount_given,
-    SUM(net_revenue)                                                    AS total_net_revenue,
-    SUM(contribution_margin)                                            AS total_contribution_margin,
-    ROUND(SUM(contribution_margin) * 100.0
-          / NULLIF(SUM(net_revenue), 0), 2)                             AS margin_rate_pct,
-    ROUND(SUM(discount_amount) * 100.0
-          / NULLIF(SUM(gross_sales), 0), 2)                             AS actual_discount_rate_pct
-FROM DiscountImpact
-GROUP BY discount_tier
-ORDER BY actual_discount_rate_pct;
-GO
-
--- BQ1-B: So sánh Margin theo Category — nhóm hàng nào bị discount bào mòn nhất?
 SELECT
     p.category,
     COUNT(DISTINCT fs.order_id)                                         AS total_orders,
-    ROUND(AVG(fs.discount_amount / NULLIF(fs.gross_sales, 0)) * 100, 2) AS avg_discount_pct,
-    ROUND(SUM(fs.contribution_margin) * 100.0
-          / NULLIF(SUM(fs.net_revenue), 0), 2)                          AS margin_rate_pct,
-    SUM(fs.net_revenue_usd)                                             AS net_revenue_usd
+    SUM(fs.gross_sales_usd)                                             AS gross_sales_usd,
+    SUM(fs.discount_amount)                                             AS discount_amount_usd,
+    SUM(fs.net_revenue_usd)                                             AS net_revenue_usd,
+    SUM(fs.contribution_margin_usd)                                     AS contribution_margin_usd,
+    ROUND(SUM(fs.discount_amount) * 100.0
+          / NULLIF(SUM(fs.gross_sales_usd), 0), 2)                      AS discount_rate_pct,
+    ROUND(SUM(fs.contribution_margin_usd) * 100.0
+          / NULLIF(SUM(fs.net_revenue_usd), 0), 2)                      AS margin_rate_pct
 FROM dbo.Fact_Sales fs
-JOIN dbo.Dim_Product p ON fs.product_key = p.product_key
+INNER JOIN dbo.Dim_Product p ON fs.product_key = p.product_key
 GROUP BY p.category
-ORDER BY avg_discount_pct DESC;
+ORDER BY discount_rate_pct DESC;
 GO
 
-
 -- =====================================================================
--- ★ BIG QUESTION 2: Khách hàng nào đáng GIỮ nhất? (Churn Risk + RFM + CLV)
---   Decision: Lên retention campaign cho nhóm nào? Budget phân bổ ra sao?
+-- BQ2: Khách hàng nào đáng giữ nhất? (Customer Health & Churn Risk by Segment)
+-- Fact: Fact_Customer_Snapshot | Dim: Dim_Customer
 -- =====================================================================
-
--- BQ2-A: Churn Risk theo Loyalty Tier tại snapshot gần nhất
-WITH LatestSnap AS (
-    SELECT MAX(snapshot_date_key) AS max_key FROM dbo.Fact_Customer_Snapshot
+WITH LatestSnapshot AS (
+    SELECT MAX(snapshot_date_key) AS max_date_key FROM dbo.Fact_Customer_Snapshot
 )
 SELECT
-    fcs.loyalty_tier,
-    fcs.rfm_score,
-    COUNT(fcs.customer_key)                                              AS total_customers,
-    SUM(CAST(fcs.active_90d_flag AS INT))                                AS active_customers,
-    COUNT(fcs.customer_key) - SUM(CAST(fcs.active_90d_flag AS INT))     AS churn_risk_count,
-    ROUND((COUNT(fcs.customer_key) - SUM(CAST(fcs.active_90d_flag AS INT)))
-          * 100.0 / NULLIF(COUNT(fcs.customer_key), 0), 2)              AS churn_risk_pct,
-    ROUND(AVG(fcs.cumulative_net_revenue_usd), 2)                        AS avg_clv_usd,
-    ROUND(AVG(CAST(fcs.days_since_last_order AS FLOAT)), 0)              AS avg_recency_days
-FROM dbo.Fact_Customer_Snapshot fcs
-JOIN LatestSnap ls ON fcs.snapshot_date_key = ls.max_key
-GROUP BY fcs.loyalty_tier, fcs.rfm_score
-ORDER BY fcs.loyalty_tier, fcs.rfm_score DESC;
-GO
-
--- BQ2-B: Top 20 Platinum customers có CLV cao nhất nhưng đang Churn Risk
-WITH LatestSnap AS (
-    SELECT MAX(snapshot_date_key) AS max_key FROM dbo.Fact_Customer_Snapshot
-)
-SELECT TOP 20
-    c.customer_name,
     c.customer_segment,
-    c.customer_country,
-    fcs.loyalty_tier,
-    fcs.rfm_score,
-    fcs.cumulative_net_revenue_usd                                       AS clv_usd,
-    fcs.cumulative_order_count,
-    fcs.days_since_last_order,
-    fcs.active_90d_flag                                                  AS is_active_90d
+    COUNT(fcs.customer_key)                                              AS total_customers,
+    SUM(CAST(fcs.active_90d_flag AS INT))                                AS active_customers_90d,
+    ROUND((1.0 - (SUM(CAST(fcs.active_90d_flag AS FLOAT)) / NULLIF(COUNT(fcs.customer_key), 0))) * 100.0, 2) AS churn_risk_rate_pct,
+    ROUND(AVG(CAST(fcs.days_since_last_order AS FLOAT)), 0)              AS avg_recency_days,
+    ROUND(AVG(CAST(fcs.rfm_score AS FLOAT)), 1)                          AS avg_rfm_score,
+    ROUND(AVG(fcs.cumulative_net_revenue_usd), 2)                        AS avg_clv_usd
 FROM dbo.Fact_Customer_Snapshot fcs
-JOIN dbo.Dim_Customer c    ON fcs.customer_key = c.customer_key
-JOIN LatestSnap ls         ON fcs.snapshot_date_key = ls.max_key
-WHERE fcs.loyalty_tier = 'Platinum'
-  AND fcs.active_90d_flag = 0                                            -- Churn risk
-ORDER BY fcs.cumulative_net_revenue_usd DESC;
+INNER JOIN dbo.Dim_Customer c ON fcs.customer_key = c.customer_key
+INNER JOIN LatestSnapshot ls ON fcs.snapshot_date_key = ls.max_date_key
+GROUP BY c.customer_segment
+ORDER BY avg_clv_usd DESC;
 GO
 
-
 -- =====================================================================
--- ★ BIG QUESTION 3: Kênh Marketing nào có ROI tốt nhất?
---   CAC vs First-Order Revenue by Channel (Marketing ROI)
---   Decision: Phân bổ ngân sách kênh nào tháng tới?
+-- BQ3: Kênh tiếp thị nào mang lại ROI cao nhất? (Marketing ROI by Channel)
+-- Fact: Fact_Customer_Acquisition | Dim: Dim_Marketing_Campaign
 -- =====================================================================
-
--- BQ3-A: ROI theo Marketing Channel (CAC → First-Order Revenue)
 SELECT
     mc.marketing_channel,
-    mc.channel_type,
-    COUNT(fca.customer_key)                                              AS new_customers,
+    COUNT(fca.customer_key)                                              AS new_customer_count,
     ROUND(SUM(fca.customer_acquisition_cost_usd), 2)                     AS total_cac_usd,
     ROUND(AVG(fca.customer_acquisition_cost_usd), 2)                     AS avg_cac_usd,
-    ROUND(SUM(fca.first_order_net_revenue_usd), 2)                       AS total_first_order_rev_usd,
-    ROUND(AVG(fca.first_order_net_revenue_usd), 2)                       AS avg_first_order_rev_usd,
+    ROUND(SUM(fca.first_order_net_revenue_usd), 2)                       AS first_order_revenue_usd,
+    ROUND(AVG(fca.first_order_net_revenue_usd), 2)                       AS avg_first_order_usd,
     ROUND(SUM(fca.first_order_net_revenue_usd)
-          / NULLIF(SUM(fca.customer_acquisition_cost_usd), 0), 2)        AS roi_ratio,       -- >1 = profitable
-    ROUND((SUM(fca.first_order_net_revenue_usd)
-           - SUM(fca.customer_acquisition_cost_usd)), 2)                 AS net_roi_usd
+          / NULLIF(SUM(fca.customer_acquisition_cost_usd), 0), 2)        AS roi_ratio
 FROM dbo.Fact_Customer_Acquisition fca
-JOIN dbo.Dim_Marketing_Campaign mc ON fca.marketing_key = mc.marketing_key
-GROUP BY mc.marketing_channel, mc.channel_type
+INNER JOIN dbo.Dim_Marketing_Campaign mc ON fca.marketing_key = mc.marketing_key
+GROUP BY mc.marketing_channel
 ORDER BY roi_ratio DESC;
-GO
-
--- BQ3-B: Kết hợp Campaign spend (Fact_Campaign_Promotion) + CLV (Fact_Customer_Snapshot)
--- → Kênh nào thu hút khách có CLV cao?
-WITH ChannelCLV AS (
-    SELECT
-        mc.marketing_channel,
-        ROUND(AVG(fcs.cumulative_net_revenue_usd), 2) AS avg_clv_usd
-    FROM dbo.Fact_Customer_Snapshot fcs
-    JOIN dbo.Fact_Customer_Acquisition fca ON fcs.customer_key = fca.customer_key
-    JOIN dbo.Dim_Marketing_Campaign mc     ON fca.marketing_key = mc.marketing_key
-    WHERE fcs.snapshot_date_key = (SELECT MAX(snapshot_date_key) FROM dbo.Fact_Customer_Snapshot)
-    GROUP BY mc.marketing_channel
-)
-SELECT
-    mc.marketing_channel,
-    COUNT(DISTINCT fcp.order_id)                                         AS promo_orders,
-    ROUND(SUM(fcp.discount_amount_usd), 2)                               AS total_promo_spend_usd,
-    ROUND(SUM(fcp.net_revenue_usd), 2)                                   AS total_promo_revenue_usd,
-    clv.avg_clv_usd,
-    ROUND(SUM(fcp.net_revenue_usd)
-          / NULLIF(SUM(fcp.discount_amount_usd), 0), 2)                  AS promo_roi_ratio
-FROM dbo.Fact_Campaign_Promotion fcp
-JOIN dbo.Dim_Marketing_Campaign mc ON fcp.marketing_key = mc.marketing_key
-LEFT JOIN ChannelCLV clv           ON mc.marketing_channel = clv.marketing_channel
-GROUP BY mc.marketing_channel, clv.avg_clv_usd
-ORDER BY promo_roi_ratio DESC;
 GO
 
 

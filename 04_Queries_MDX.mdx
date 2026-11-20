@@ -1,141 +1,125 @@
-/* =====================================================================
-   05_Queries_MDX.mdx
+﻿/* =====================================================================
+   04_Queries_MDX.mdx
    BỘ TRUY VẤN ĐA CHIỀU MDX TRÊN CÁC KHỐI SSAS OLAP CUBES
-   Đáp ứng tiêu chí đánh giá Tiêu chí 5 (Rubric DWH - 15 Điểm)
    Cubes: [Doanh thu ban hang], [Van hanh Logistic], [Hanh vi khach hang], [Tong hop Audit]
 
-   ★ 3 CÂU HỎI NGHIỆP VỤ TRỌNG TÂM ★
-   BQ1: Discount Rate → Contribution Margin  (Profitability)
-   BQ2: Churn Risk + RFM + CLV               (Customer Retention)
-   BQ3: CAC vs Revenue by Channel            (Marketing ROI)
+   ★ PHẦN 0: 3 CÂU HỎI NGHIỆP VỤ TRỌNG TÂM (BIG BUSINESS QUESTIONS) ★
+   - BQ1: Margin Rate vs Discount Rate by Category (Profitability)
+   - BQ2: Customer Health, Churn Risk & CLV by Segment (Retention)
+   - BQ3: CAC vs First-Order Revenue & ROI by Channel (Marketing ROI)
+
+   ★ PHẦN 1 - 4: 9 CÂU TRUY VẤN ĐA CHIỀU OLAP CHUYÊN SÂU THEO RUBRIC (MDX 1 - MDX 9) ★
    ===================================================================== */
 
 
 -- =====================================================================
--- ★ BIG QUESTION 1: Chiết khấu có đang PHÁ MARGIN không?
---   Cube: [Doanh thu ban hang]
+-- BQ1: Chiết khấu có đang bào mòn biên lợi nhuận không? (Profitability by Category)
+-- Cube: [Doanh thu ban hang]
 -- =====================================================================
+WITH 
+  MEMBER [Measures].[Discount Rate %] AS
+    IIF([Measures].[Gross Sales Usd] = 0, NULL,
+        [Measures].[Discount Amount] / [Measures].[Gross Sales Usd]),
+    FORMAT_STRING = "0.00%"
 
--- MDX BQ1-A: Margin Rate % và Discount Rate % theo Category
--- (So sánh: nhóm hàng nào bị discount bào mòn margin nhất?)
-SELECT
+  MEMBER [Measures].[Margin Rate %] AS
+    IIF([Measures].[Net Revenue Usd] = 0, NULL,
+        [Measures].[Contribution Margin Usd] / [Measures].[Net Revenue Usd]),
+    FORMAT_STRING = "0.00%"
+
+SELECT 
     {[Measures].[Net Revenue Usd],
      [Measures].[Discount Amount],
-     [Measures].[Contribution Margin],
-     [Measures].[Margin Rate %],
-     [Measures].[Discount Rate %]} ON COLUMNS,
-    NON EMPTY
+     [Measures].[Contribution Margin Usd],
+     [Measures].[Discount Rate %],
+     [Measures].[Margin Rate %]} ON COLUMNS,
+    NON EMPTY 
     ORDER(
-        [Dim Product].[Category].[Category].MEMBERS,
+        [Dim Product].[Category].CHILDREN,
         [Measures].[Discount Rate %],
         BDESC
     ) ON ROWS
 FROM [Doanh thu ban hang];
 
--- MDX BQ1-B: Margin Rate % theo Năm × Category (Time-series Profitability)
-SELECT
-    {[Measures].[Net Revenue Usd], [Measures].[Margin Rate %]} ON COLUMNS,
-    NON EMPTY CROSSJOIN(
-        [Dim Date].[Calendar Hierarchy].[Year].MEMBERS,
-        [Dim Product].[Category].[Category].MEMBERS
-    ) ON ROWS
-FROM [Doanh thu ban hang];
-
--- MDX BQ1-C: Coupon Usage Rate % — đơn có coupon vs không coupon
-SELECT
-    {[Measures].[Net Revenue Usd],
-     [Measures].[Coupon Orders],
-     [Measures].[Coupon Usage Rate %],
-     [Measures].[Discount Rate %]} ON COLUMNS
-FROM [Doanh thu ban hang];
-
 
 -- =====================================================================
--- ★ BIG QUESTION 2: Khách hàng nào đáng GIỮ nhất? (Churn Risk + CLV)
---   Cube: [Hanh vi khach hang]
+-- BQ2: Khách hàng nào đáng giữ nhất? (Customer Health & Churn Risk by Segment)
+-- Cube: [Hanh vi khach hang]
 -- =====================================================================
+WITH 
+  MEMBER [Measures].[Avg CLV USD] AS
+    IIF([Measures].[Fact Customer Snapshot Count] = 0, NULL,
+        [Measures].[Cumulative Net Revenue Usd] / [Measures].[Fact Customer Snapshot Count]),
+    FORMAT_STRING = "$#,##0.00"
 
--- MDX BQ2-A: CLV trung bình + Active 90D customers theo Loyalty Tier
--- (Xác định nhóm Platinum/Gold sắp rời bỏ)
-SELECT
-    {[Measures].[Cumulative Net Revenue Usd],
-     [Measures].[Active 90 D Customers],
-     [Measures].[Avg Days Since Last Order],
-     [Measures].[Avg Rfm Score]} ON COLUMNS,
-    NON EMPTY
+  MEMBER [Measures].[Avg Recency Days] AS
+    IIF([Measures].[Fact Customer Snapshot Count] = 0, NULL,
+        [Measures].[Days Since Last Order] / [Measures].[Fact Customer Snapshot Count]),
+    FORMAT_STRING = "#,##0"
+
+  MEMBER [Measures].[Avg RFM Score] AS
+    IIF([Measures].[Fact Customer Snapshot Count] = 0, NULL,
+        [Measures].[Rfm Score] / [Measures].[Fact Customer Snapshot Count]),
+    FORMAT_STRING = "0.0"
+
+  MEMBER [Measures].[Churn Risk Rate %] AS
+    IIF([Measures].[Fact Customer Snapshot Count] = 0, NULL,
+        (1 - ([Measures].[Active 90d Flag] / [Measures].[Fact Customer Snapshot Count])) * 100),
+    FORMAT_STRING = "0.00%"
+
+SELECT 
+    {[Measures].[Fact Customer Snapshot Count],
+     [Measures].[Active 90d Flag],
+     [Measures].[Churn Risk Rate %],
+     [Measures].[Avg Recency Days],
+     [Measures].[Avg RFM Score],
+     [Measures].[Avg CLV USD]} ON COLUMNS,
+    NON EMPTY 
     ORDER(
-        [Dim Customer].[Loyalty Tier].[Loyalty Tier].MEMBERS,
-        [Measures].[Cumulative Net Revenue Usd],
+        [Dim Customer].[Customer Segment].CHILDREN,
+        [Measures].[Avg CLV USD],
         BDESC
     ) ON ROWS
 FROM [Hanh vi khach hang];
 
--- MDX BQ2-B: Phân bổ RFM Score theo Customer Segment
--- (Phân khúc nào có RFM thấp nhất → cần retention campaign ngay)
-SELECT
-    {[Measures].[Avg Rfm Score],
-     [Measures].[Monthly Revenue Usd],
-     [Measures].[Customer Count]} ON COLUMNS,
-    NON EMPTY CROSSJOIN(
-        [Dim Customer].[Customer Segment].[Customer Segment].MEMBERS,
-        [Dim Customer].[Loyalty Tier].[Loyalty Tier].MEMBERS
-    ) ON ROWS
-FROM [Hanh vi khach hang];
-
--- MDX BQ2-C: Trend CLV theo Tháng (Periodic Snapshot — xem CLV tăng/giảm)
-SELECT
-    {[Measures].[Cumulative Net Revenue Usd],
-     [Measures].[Monthly Revenue Usd],
-     [Measures].[Active 90 D Customers]} ON COLUMNS,
-    NON EMPTY
-    [Dim Date].[Calendar Hierarchy].[Month Name].MEMBERS ON ROWS
-FROM [Hanh vi khach hang];
-
 
 -- =====================================================================
--- ★ BIG QUESTION 3: Kênh Marketing nào có ROI tốt nhất?
---   CAC vs Revenue by Channel — Cube: [Hanh vi khach hang] + [Doanh thu ban hang]
+-- BQ3: Kênh tiếp thị nào mang lại ROI cao nhất? (Marketing ROI by Channel)
+-- Cube: [Hanh vi khach hang]
 -- =====================================================================
+WITH 
+  MEMBER [Measures].[Average CAC USD] AS
+    IIF([Measures].[New Customer Count] = 0, NULL,
+        [Measures].[Customer Acquisition Cost Usd] / [Measures].[New Customer Count]),
+    FORMAT_STRING = "$#,##0.00"
 
--- MDX BQ3-A: CAC trung bình + New Customers + First-Order Revenue theo Marketing Channel
-SELECT
+  MEMBER [Measures].[Average First Order USD] AS
+    IIF([Measures].[New Customer Count] = 0, NULL,
+        [Measures].[First Order Net Revenue Usd] / [Measures].[New Customer Count]),
+    FORMAT_STRING = "$#,##0.00"
+
+  MEMBER [Measures].[ROI Ratio] AS
+    IIF([Measures].[Customer Acquisition Cost Usd] = 0, NULL,
+        [Measures].[First Order Net Revenue Usd] / [Measures].[Customer Acquisition Cost Usd]),
+    FORMAT_STRING = "0.00"
+
+SELECT 
     {[Measures].[New Customer Count],
-     [Measures].[Acquisition Cost Usd],
-     [Measures].[Average Cac Usd],
-     [Measures].[First Order Revenue Usd]} ON COLUMNS,
-    NON EMPTY
+     [Measures].[Customer Acquisition Cost Usd],
+     [Measures].[Average CAC USD],
+     [Measures].[First Order Net Revenue Usd],
+     [Measures].[Average First Order USD],
+     [Measures].[ROI Ratio]} ON COLUMNS,
+    NON EMPTY 
     ORDER(
-        [Dim Marketing Campaign].[Marketing Channel].[Marketing Channel].MEMBERS,
-        [Measures].[Average Cac Usd],
-        BASC
-    ) ON ROWS
-FROM [Hanh vi khach hang];
-
--- MDX BQ3-B: Promo Revenue vs Promo Spend theo Marketing Channel
--- (ROI của từng kênh campaign)
-SELECT
-    {[Measures].[Net Revenue Usd],
-     [Measures].[Promo Discount Amount],
-     [Measures].[Coupon Orders]} ON COLUMNS,
-    NON EMPTY
-    ORDER(
-        [Dim Marketing Campaign].[Marketing Channel].[Marketing Channel].MEMBERS,
-        [Measures].[Net Revenue Usd],
+        [Dim Marketing Campaign].[Marketing Channel].CHILDREN,
+        [Measures].[ROI Ratio],
         BDESC
     ) ON ROWS
-FROM [Doanh thu ban hang];
-
--- MDX BQ3-C: CrossJoin Channel × Year → xem kênh nào tăng trưởng khách mới
-SELECT
-    {[Measures].[New Customer Count], [Measures].[Average Cac Usd]} ON COLUMNS,
-    NON EMPTY CROSSJOIN(
-        [Dim Date].[Calendar Hierarchy].[Year].MEMBERS,
-        [Dim Marketing Campaign].[Channel Type].[Channel Type].MEMBERS
-    ) ON ROWS
 FROM [Hanh vi khach hang];
 
 
--- =====================================================================
+
 -- PHẦN 1: PHÂN TÍCH DOANH THU & BÁN HÀNG (Cube: [Doanh thu ban hang])
 -- =====================================================================
 

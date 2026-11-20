@@ -41,10 +41,10 @@
                 <SSIS:Property SSIS:Name="Name">Package</SSIS:Property>
                 <SSIS:Property SSIS:Name="VersionMajor">1</SSIS:Property>
                 <SSIS:Property SSIS:Name="VersionMinor">0</SSIS:Property>
-                <SSIS:Property SSIS:Name="VersionBuild">78</SSIS:Property>
+                <SSIS:Property SSIS:Name="VersionBuild">86</SSIS:Property>
                 <SSIS:Property SSIS:Name="VersionComments">
                 </SSIS:Property>
-                <SSIS:Property SSIS:Name="VersionGUID">{44354B3B-D3F2-421F-91C2-AC9B2303A75A}</SSIS:Property>
+                <SSIS:Property SSIS:Name="VersionGUID">{B670A1B6-B4EE-4EF5-BFCE-D9791B56FAE8}</SSIS:Property>
                 <SSIS:Property SSIS:Name="PackageFormatVersion">8</SSIS:Property>
                 <SSIS:Property SSIS:Name="Description">
                 </SSIS:Property>
@@ -122,7 +122,7 @@
                     <SSIS:Property SSIS:Name="IncludeInDebugDump">0</SSIS:Property>
                     <SSIS:Property SSIS:Name="Required">0</SSIS:Property>
                     <SSIS:Property SSIS:Name="Sensitive">0</SSIS:Property>
-                    <SSIS:Property SSIS:Name="Value">C:\Users\quach\Downloads\datakho\datakho\cuoki\etl\final\du_lieu_csv\customer_master.csv</SSIS:Property>
+                    <SSIS:Property SSIS:Name="Value">C:\Users\quach\Downloads\datakho\datakho\cuoki\etl\ecomdw\du_lieu_csv\customer_master.csv</SSIS:Property>
                     <SSIS:Property SSIS:Name="DataType">18</SSIS:Property>
                   </SSIS:Properties>
                 </SSIS:Parameter>
@@ -319,7 +319,7 @@
                     <SSIS:Property SSIS:Name="IncludeInDebugDump">0</SSIS:Property>
                     <SSIS:Property SSIS:Name="Required">0</SSIS:Property>
                     <SSIS:Property SSIS:Name="Sensitive">0</SSIS:Property>
-                    <SSIS:Property SSIS:Name="Value">C:\Users\quach\Downloads\datakho\datakho\cuoki\etl\final\du_lieu_csv\order_items.csv</SSIS:Property>
+                    <SSIS:Property SSIS:Name="Value">C:\Users\quach\Downloads\datakho\datakho\cuoki\etl\ecomdw\du_lieu_csv\order_items.csv</SSIS:Property>
                     <SSIS:Property SSIS:Name="DataType">18</SSIS:Property>
                   </SSIS:Properties>
                 </SSIS:Parameter>
@@ -516,7 +516,7 @@
                     <SSIS:Property SSIS:Name="IncludeInDebugDump">0</SSIS:Property>
                     <SSIS:Property SSIS:Name="Required">0</SSIS:Property>
                     <SSIS:Property SSIS:Name="Sensitive">0</SSIS:Property>
-                    <SSIS:Property SSIS:Name="Value">C:\Users\quach\Downloads\datakho\datakho\cuoki\etl\final\du_lieu_csv\product_catalog.csv</SSIS:Property>
+                    <SSIS:Property SSIS:Name="Value">C:\Users\quach\Downloads\datakho\datakho\cuoki\etl\ecomdw\du_lieu_csv\product_catalog.csv</SSIS:Property>
                     <SSIS:Property SSIS:Name="DataType">18</SSIS:Property>
                   </SSIS:Properties>
                 </SSIS:Parameter>
@@ -713,7 +713,7 @@
                     <SSIS:Property SSIS:Name="IncludeInDebugDump">0</SSIS:Property>
                     <SSIS:Property SSIS:Name="Required">0</SSIS:Property>
                     <SSIS:Property SSIS:Name="Sensitive">0</SSIS:Property>
-                    <SSIS:Property SSIS:Name="Value">C:\Users\quach\Downloads\datakho\datakho\cuoki\etl\final\du_lieu_csv\ecommerce_sales_customer_analytics_150k.csv</SSIS:Property>
+                    <SSIS:Property SSIS:Name="Value">C:\Users\quach\Downloads\datakho\datakho\cuoki\etl\ecomdw\du_lieu_csv\ecommerce_sales_customer_analytics_150k.csv</SSIS:Property>
                     <SSIS:Property SSIS:Name="DataType">18</SSIS:Property>
                   </SSIS:Properties>
                 </SSIS:Parameter>

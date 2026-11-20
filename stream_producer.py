@@ -208,9 +208,7 @@ def main():
     elapsed = time.time() - t_start
     print(f"\n{'─'*55}")
     print(f"[DONE] Sent {total_sent:,} rows in {elapsed:.1f}s "
-          f"({total_sent/elapsed:.1f} rows/s avg)")
-    print(f"       Batches: {batch_num}  |  "
-          f"Now run: EXEC dbo.sp_Consume_MicroBatch @batch_size=5000")
+          f"({total_sent/elapsed:.1f} rows/s avg) | Batches: {batch_num} ")
     print(f"{'─'*55}")
 
     cursor.close()
