@@ -1,0 +1,257 @@
+/* =====================================================================
+   05_Queries_MDX.mdx
+   BỘ TRUY VẤN ĐA CHIỀU MDX TRÊN CÁC KHỐI SSAS OLAP CUBES
+   Đáp ứng tiêu chí đánh giá Tiêu chí 5 (Rubric DWH - 15 Điểm)
+   Cubes: [Doanh thu ban hang], [Van hanh Logistic], [Hanh vi khach hang], [Tong hop Audit]
+
+   ★ 3 CÂU HỎI NGHIỆP VỤ TRỌNG TÂM ★
+   BQ1: Discount Rate → Contribution Margin  (Profitability)
+   BQ2: Churn Risk + RFM + CLV               (Customer Retention)
+   BQ3: CAC vs Revenue by Channel            (Marketing ROI)
+   ===================================================================== */
+
+
+-- =====================================================================
+-- ★ BIG QUESTION 1: Chiết khấu có đang PHÁ MARGIN không?
+--   Cube: [Doanh thu ban hang]
+-- =====================================================================
+
+-- MDX BQ1-A: Margin Rate % và Discount Rate % theo Category
+-- (So sánh: nhóm hàng nào bị discount bào mòn margin nhất?)
+SELECT
+    {[Measures].[Net Revenue Usd],
+     [Measures].[Discount Amount],
+     [Measures].[Contribution Margin],
+     [Measures].[Margin Rate %],
+     [Measures].[Discount Rate %]} ON COLUMNS,
+    NON EMPTY
+    ORDER(
+        [Dim Product].[Category].[Category].MEMBERS,
+        [Measures].[Discount Rate %],
+        BDESC
+    ) ON ROWS
+FROM [Doanh thu ban hang];
+
+-- MDX BQ1-B: Margin Rate % theo Năm × Category (Time-series Profitability)
+SELECT
+    {[Measures].[Net Revenue Usd], [Measures].[Margin Rate %]} ON COLUMNS,
+    NON EMPTY CROSSJOIN(
+        [Dim Date].[Calendar Hierarchy].[Year].MEMBERS,
+        [Dim Product].[Category].[Category].MEMBERS
+    ) ON ROWS
+FROM [Doanh thu ban hang];
+
+-- MDX BQ1-C: Coupon Usage Rate % — đơn có coupon vs không coupon
+SELECT
+    {[Measures].[Net Revenue Usd],
+     [Measures].[Coupon Orders],
+     [Measures].[Coupon Usage Rate %],
+     [Measures].[Discount Rate %]} ON COLUMNS
+FROM [Doanh thu ban hang];
+
+
+-- =====================================================================
+-- ★ BIG QUESTION 2: Khách hàng nào đáng GIỮ nhất? (Churn Risk + CLV)
+--   Cube: [Hanh vi khach hang]
+-- =====================================================================
+
+-- MDX BQ2-A: CLV trung bình + Active 90D customers theo Loyalty Tier
+-- (Xác định nhóm Platinum/Gold sắp rời bỏ)
+SELECT
+    {[Measures].[Cumulative Net Revenue Usd],
+     [Measures].[Active 90 D Customers],
+     [Measures].[Avg Days Since Last Order],
+     [Measures].[Avg Rfm Score]} ON COLUMNS,
+    NON EMPTY
+    ORDER(
+        [Dim Customer].[Loyalty Tier].[Loyalty Tier].MEMBERS,
+        [Measures].[Cumulative Net Revenue Usd],
+        BDESC
+    ) ON ROWS
+FROM [Hanh vi khach hang];
+
+-- MDX BQ2-B: Phân bổ RFM Score theo Customer Segment
+-- (Phân khúc nào có RFM thấp nhất → cần retention campaign ngay)
+SELECT
+    {[Measures].[Avg Rfm Score],
+     [Measures].[Monthly Revenue Usd],
+     [Measures].[Customer Count]} ON COLUMNS,
+    NON EMPTY CROSSJOIN(
+        [Dim Customer].[Customer Segment].[Customer Segment].MEMBERS,
+        [Dim Customer].[Loyalty Tier].[Loyalty Tier].MEMBERS
+    ) ON ROWS
+FROM [Hanh vi khach hang];
+
+-- MDX BQ2-C: Trend CLV theo Tháng (Periodic Snapshot — xem CLV tăng/giảm)
+SELECT
+    {[Measures].[Cumulative Net Revenue Usd],
+     [Measures].[Monthly Revenue Usd],
+     [Measures].[Active 90 D Customers]} ON COLUMNS,
+    NON EMPTY
+    [Dim Date].[Calendar Hierarchy].[Month Name].MEMBERS ON ROWS
+FROM [Hanh vi khach hang];
+
+
+-- =====================================================================
+-- ★ BIG QUESTION 3: Kênh Marketing nào có ROI tốt nhất?
+--   CAC vs Revenue by Channel — Cube: [Hanh vi khach hang] + [Doanh thu ban hang]
+-- =====================================================================
+
+-- MDX BQ3-A: CAC trung bình + New Customers + First-Order Revenue theo Marketing Channel
+SELECT
+    {[Measures].[New Customer Count],
+     [Measures].[Acquisition Cost Usd],
+     [Measures].[Average Cac Usd],
+     [Measures].[First Order Revenue Usd]} ON COLUMNS,
+    NON EMPTY
+    ORDER(
+        [Dim Marketing Campaign].[Marketing Channel].[Marketing Channel].MEMBERS,
+        [Measures].[Average Cac Usd],
+        BASC
+    ) ON ROWS
+FROM [Hanh vi khach hang];
+
+-- MDX BQ3-B: Promo Revenue vs Promo Spend theo Marketing Channel
+-- (ROI của từng kênh campaign)
+SELECT
+    {[Measures].[Net Revenue Usd],
+     [Measures].[Promo Discount Amount],
+     [Measures].[Coupon Orders]} ON COLUMNS,
+    NON EMPTY
+    ORDER(
+        [Dim Marketing Campaign].[Marketing Channel].[Marketing Channel].MEMBERS,
+        [Measures].[Net Revenue Usd],
+        BDESC
+    ) ON ROWS
+FROM [Doanh thu ban hang];
+
+-- MDX BQ3-C: CrossJoin Channel × Year → xem kênh nào tăng trưởng khách mới
+SELECT
+    {[Measures].[New Customer Count], [Measures].[Average Cac Usd]} ON COLUMNS,
+    NON EMPTY CROSSJOIN(
+        [Dim Date].[Calendar Hierarchy].[Year].MEMBERS,
+        [Dim Marketing Campaign].[Channel Type].[Channel Type].MEMBERS
+    ) ON ROWS
+FROM [Hanh vi khach hang];
+
+
+-- =====================================================================
+-- PHẦN 1: PHÂN TÍCH DOANH THU & BÁN HÀNG (Cube: [Doanh thu ban hang])
+-- =====================================================================
+
+-- ---------------------------------------------------------------------
+-- MDX 1: Top 10 sản phẩm bán chạy nhất theo số lượng (Quantity)
+-- Ý nghĩa: Xác định sản phẩm chủ lực (Best-seller) phục vụ kế hoạch nhập hàng tháng tới.
+-- ---------------------------------------------------------------------
+SELECT 
+    {[Measures].[Quantity], [Measures].[Net Revenue Usd], [Measures].[Gross Sales Usd]} ON COLUMNS,
+    TOPCOUNT([Dim Product].[Product Name].[Product Name].MEMBERS, 10, [Measures].[Quantity]) ON ROWS
+FROM [Doanh thu ban hang];
+
+-- ---------------------------------------------------------------------
+-- MDX 2: Doanh thu thuần và Số lượng bán theo Ngành hàng (Category) qua các Năm
+-- Ý nghĩa: Phân tích tăng trưởng doanh số theo ngành hàng qua các năm (Time-series trend).
+-- ---------------------------------------------------------------------
+SELECT 
+    {[Measures].[Net Revenue Usd], [Measures].[Quantity]} ON COLUMNS,
+    NON EMPTY CROSSJOIN(
+        [Dim Date].[Calendar Hierarchy].[Year].MEMBERS,
+        [Dim Product].[Product Hierarchy].[Category].MEMBERS
+    ) ON ROWS
+FROM [Doanh thu ban hang];
+
+-- ---------------------------------------------------------------------
+-- MDX 3: Hiệu quả các Chiến dịch Khuyến mãi (Promotion Campaigns)
+-- Ý nghĩa: Đánh giá chiến dịch marketing mang lại doanh số thực thu cao nhất.
+-- ---------------------------------------------------------------------
+SELECT 
+    {[Measures].[Net Revenue Usd - Fact Campaign Promotion], 
+     [Measures].[Discount Amount - Fact Campaign Promotion],
+     [Measures].[Fact Campaign Promotion Count]} ON COLUMNS,
+    ORDER(
+        [Dim Marketing Campaign].[Campaign Name].[Campaign Name].MEMBERS,
+        [Measures].[Net Revenue Usd - Fact Campaign Promotion],
+        BDESC
+    ) ON ROWS
+FROM [Doanh thu ban hang];
+
+-- ---------------------------------------------------------------------
+-- MDX 4: Phân tích lý do hoàn trả hàng và thiệt hại doanh thu (Return Analysis)
+-- Ý nghĩa: Khách hàng thường phàn nàn/hoàn trả hàng vì lý do gì nhiều nhất?
+-- ---------------------------------------------------------------------
+SELECT 
+    {[Measures].[Fact Return Count], [Measures].[Returned Net Revenue Usd]} ON COLUMNS,
+    ORDER(
+        [Dim Return Profile].[Return Reason].[Return Reason].MEMBERS,
+        [Measures].[Fact Return Count],
+        BDESC
+    ) ON ROWS
+FROM [Doanh thu ban hang];
+
+-- ---------------------------------------------------------------------
+-- MDX 5: Doanh thu theo Châu lục và Quốc gia (Drill-down Geography)
+-- Ý nghĩa: Xác định thị trường trọng điểm đóng góp doanh thu lớn nhất.
+-- ---------------------------------------------------------------------
+SELECT 
+    {[Measures].[Net Revenue Usd], [Measures].[Fact Sales Count]} ON COLUMNS,
+    NON EMPTY [Dim Region].[Geography Hierarchy].[Country].MEMBERS ON ROWS
+FROM [Doanh thu ban hang];
+
+
+-- =====================================================================
+-- PHẦN 2: PHÂN TÍCH VẬN HÀNH & GIAO HÀNG (Cube: [Van hanh Logistic])
+-- =====================================================================
+
+-- ---------------------------------------------------------------------
+-- MDX 6: Số lượng đơn hàng và tình trạng giao hàng theo Kho bãi (Warehouse)
+-- Ý nghĩa: Giám sát năng lực xử lý đơn hàng và hiệu suất hoàn thành của từng kho.
+-- ---------------------------------------------------------------------
+SELECT 
+    {[Measures].[Fact Order Fulfillment Count]} ON COLUMNS,
+    NON EMPTY CROSSJOIN(
+        [Dim Shipping].[Warehouse].[Warehouse].MEMBERS,
+        [Dim Shipping].[Shipping Method].[Shipping Method].MEMBERS
+    ) ON ROWS
+FROM [Van hanh Logistic];
+
+
+-- =====================================================================
+-- PHẦN 3: PHÂN TÍCH HÀNH VI KHÁCH HÀNG (Cube: [Hanh vi khach hang])
+-- =====================================================================
+
+-- ---------------------------------------------------------------------
+-- MDX 7: Doanh thu tích lũy trung bình và số khách hàng theo Phân khúc (Segment)
+-- Ý nghĩa: Đo lường giá trị vòng đời khách hàng (Customer Lifetime Value - CLV).
+-- ---------------------------------------------------------------------
+SELECT 
+    {[Measures].[Cumulative Net Revenue Usd], [Measures].[Fact Customer Snapshot Count]} ON COLUMNS,
+    [Dim Customer].[Customer Segment].[Customer Segment].MEMBERS ON ROWS
+FROM [Hanh vi khach hang];
+
+-- ---------------------------------------------------------------------
+-- MDX 8: Chi phí thu hút khách hàng mới (CAC) theo Kênh tiếp thị (Marketing Channel)
+-- Ý nghĩa: Tìm kênh tiếp thị có chi phí rẻ nhất để kéo khách hàng mới.
+-- ---------------------------------------------------------------------
+SELECT 
+    {[Measures].[Customer Acquisition Cost], [Measures].[Fact Customer Acquisition Count]} ON COLUMNS,
+    [Dim Marketing Campaign].[Marketing Channel].[Marketing Channel].MEMBERS ON ROWS
+FROM [Hanh vi khach hang];
+
+
+-- =====================================================================
+-- PHẦN 4: ĐỐI SOÁT TỔNG HỢP (Cube: [Tong hop Audit])
+-- =====================================================================
+
+-- ---------------------------------------------------------------------
+-- MDX 9: Đối soát số lượng bản ghi tổng thể của tất cả các Fact Tables
+-- Ý nghĩa: Kiểm toán tính toàn vẹn (Data Reconciliation) của toàn bộ kho dữ liệu.
+-- ---------------------------------------------------------------------
+SELECT 
+    {[Measures].[Fact Sales Count], 
+     [Measures].[Fact Order Fulfillment Count], 
+     [Measures].[Fact Return Count],
+     [Measures].[Fact Customer Feedback Count],
+     [Measures].[Fact Customer Acquisition Count],
+     [Measures].[Fact Campaign Promotion Count],
+     [Measures].[Fact Customer Snapshot Count]} ON COLUMNS
+FROM [Tong hop Audit];

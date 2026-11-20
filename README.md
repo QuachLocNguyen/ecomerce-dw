@@ -1,98 +1,251 @@
-# DỰ ÁN KHO DỮ LIỆU THƯƠNG MẠI ĐIỆN TỬ (ECOMMERCE DATA WAREHOUSE)
+# Ecommerce Data Warehouse & Analytics Platform
 
-* **Môn học:** Kho dữ liệu & Hệ thống hỗ trợ ra quyết định (Data Warehouse & DSS)
-* **Đề tài:** Xây dựng Data Warehouse & Khối phân tích OLAP cho dữ liệu Bán hàng & Hành vi Khách hàng Thương mại Điện tử (E-Commerce Sales Analytics)
-* **Nền tảng công nghệ:** Microsoft SQL Server, SQL Server Integration Services (SSIS), SQL Server Analysis Services (SSAS), T-SQL, MDX.
-* **Tập dữ liệu nguồn:** Kaggle E-Commerce Dataset (138.116 đơn hàng, 397.569 chi tiết dòng hàng, 25.000 khách hàng, 1.175 sản phẩm; giai đoạn 2021 – 2025).
+> **End-to-end Data Engineering capstone project** — Galaxy-Schema DWH on SQL Server with SSIS ETL pipeline, SSAS OLAP Cubes, and a Near Real-Time Micro-Batch streaming layer simulating continuous order ingestion.
 
----
-
-## 📌 BÁO CÁO TIẾN ĐỘ THỰC HIỆN (CẬP NHẬT: 29/10/2026)
-
-### ✅ ĐÃ HOÀN THÀNH TOÀN DIỆN (CSDL, PIPELINE ETL & 15 TRUY VẤN SQL)
-
-#### 1. Thiết kế Mô hình Kho dữ liệu & Cơ sở dữ liệu (Database Design)
-- [x] **Khảo sát dữ liệu nguồn:** Phân tích độ dài, kiểu dữ liệu, các giá trị phân biệt (distinct values) và tính toàn vẹn tham chiếu của 4 file CSV.
-- [x] **Mô hình DWH chuẩn Kimball:** Xây dựng mô hình **Galaxy Schema kết hợp Star Schema (8 Dimensions + 7 Fact Tables)**:
-  - Khử chuẩn hóa (Denormalization) cho `Dim_Product` và `Dim_Customer` để loại bỏ các bảng 2 cột vô nghĩa, tăng tốc truy vấn JOIN.
-  - Áp dụng kỹ thuật **Junk Dimension** cho `Dim_Order_Profile` (gom 5 cờ trạng thái nhỏ lẻ), giảm 4 khóa ngoại trong `Fact_Sales`.
-  - Phân loại rõ ràng 7 Fact: 3 Core Facts (`Fact_Sales`, `Fact_Order_Fulfillment`, `Fact_Return`) và 4 Strategic Facts (`Fact_Customer_Feedback`, `Fact_Customer_Acquisition`, `Fact_Customer_Snapshot`, `Fact_Campaign_Promotion`).
-- [x] **Tạo CSDL & Vùng đệm Staging:**
-  - `00_Create_Staging_Tables.sql`: Tạo 4 bảng Staging (`stg_sales_full`, `stg_order_items`, `stg_product_catalog`, `stg_customer_master`) hỗ trợ nạp thô an toàn.
-  - `01_Create_EcommerceDW_v2.sql`: Tạo cấu trúc chuẩn 8 Dim + 7 Fact, khóa chính, khóa ngoại, ràng buộc toàn vẹn và tạo Non-Clustered Indexes tối ưu.
+![Python](https://img.shields.io/badge/Python-3.8+-3776AB?logo=python&logoColor=white)
+![SQL Server](https://img.shields.io/badge/SQL_Server-2019-CC2927?logo=microsoftsqlserver&logoColor=white)
+![SSIS](https://img.shields.io/badge/SSIS-ETL_Pipeline-0078D4?logo=microsoft&logoColor=white)
+![SSAS](https://img.shields.io/badge/SSAS-OLAP_Cubes-0078D4?logo=microsoft&logoColor=white)
+![T-SQL](https://img.shields.io/badge/T--SQL-MDX-CC2927)
 
 ---
 
-#### 2. Xây dựng & Thực thi Pipeline ETL (Nạp sạch 100% DWH)
-Toàn bộ luồng ETL đã được triển khai hoàn chỉnh trên Visual Studio (SSIS Package) và Master T-SQL Script (`ETL.sql`), nạp thành công hơn 800.000 dòng dữ liệu vào CSDL `EcommerceDW`:
+## Architecture
 
-- [x] **Giai đoạn 1 (Prepare Staging):** Truncate 4 bảng staging trước mỗi mẻ chạy.
-- [x] **Giai đoạn 2 (Extract CSV To Staging):** Nạp sạch 4 file CSV vào 4 bảng staging.
-- [x] **Giai đoạn 3 (Transform & Load 8 Dimensions):**
-  1. `Dim_Date`: 2.191 dòng (2021-2026), tính quý, mùa vụ, cờ cuối tháng.
-  2. `Dim_Product`: 1.175 dòng, đầy đủ ngành hàng (`category`), nhóm hàng (`subcategory`), thương hiệu (`brand`), `price_tier`, `rating_group`.
-  3. `Dim_Customer`: 25.000 khách hàng, phân nhóm `age_group`, `customer_segment`.
-  4. `Dim_Region`: 38 vùng/bang duy nhất trên toàn cầu.
-  5. `Dim_Shipping`: 76 tổ hợp phương thức giao hàng và kho bãi, phân nhóm tốc độ giao (`shipping_speed_category`).
-  6. `Dim_Order_Profile`: 308 tổ hợp trạng thái đơn hàng (Junk Dimension).
-  7. `Dim_Marketing_Campaign`: 1.260 chiến dịch tiếp thị và mã coupon, phân nhóm `channel_type`.
-  8. `Dim_Return_Profile`: 8 tổ hợp lý do hoàn trả và phân loại nguyên nhân (`return_reason_category`).
-- [x] **Giai đoạn 4 (Transform & Load 7 Fact Tables):**
-  1. `Fact_Sales`: 397.482 dòng (Doanh thu thuần: 192.370.085,82 USD).
-  2. `Fact_Order_Fulfillment`: 113.559 dòng (Role-playing Dimension 3 mốc ngày).
-  3. `Fact_Return`: 9.462 đơn hoàn trả.
-  4. `Fact_Customer_Feedback`: 113.559 lượt đánh giá & chỉ số sentiment.
-  5. `Fact_Customer_Acquisition`: 24.911 khách hàng có đơn hàng đầu tiên và chi phí CAC.
-  6. `Fact_Campaign_Promotion`: 14.986 đơn hàng áp dụng mã khuyến mại.
-  7. `Fact_Customer_Snapshot`: 131.716 snapshot khách hàng qua từng tháng, điểm RFM và hạng thành viên.
+```
+┌──────────────────────────────────────────────────────────────────┐
+│  SOURCE                 STAGING              DWH                  │
+│  4 CSV files      →     4 stg_* tables  →   9 Dimensions         │
+│  138K orders            (SQL Server)         7 Fact Tables        │
+│  397K line-items                             EcommerceDW          │
+│  25K customers                                                     │
+│  1.1K products                                   ↓                │
+│                                             SSAS OLAP             │
+│                                             4 Subject Cubes       │
+├──────────────────────────────────────────────────────────────────┤
+│  STREAMING LAYER (Near Real-Time)                                  │
+│  stream_producer.py → stg_sales_stream → sp_Consume_MicroBatch   │
+│  (Python pyodbc)       (watermark buffer)   (SQL Agent, 30s)      │
+└──────────────────────────────────────────────────────────────────┘
+```
 
 ---
 
-#### 3. Bộ 15 Câu truy vấn Phân tích Kinh doanh SQL
-- [x] `03_Queries_SQL.sql`: Đã hoàn thiện và kiểm tra chạy thành công 100% trên `EcommerceDW`, đáp ứng trọn vẹn 15 bài toán nghiệp vụ theo Rubric Tiêu chí 5.
+## Business Questions Answered
+
+This DWH is designed to answer **3 core business questions** that drive real operational decisions:
 
 ---
 
-### 🔄 TIẾN ĐỘ THỰC HIỆN HIỆN TẠI (ĐANG TRIỂN KHAI)
+### ❓ BQ1 — Does discounting destroy profit margins?
+> *"Which discount tiers (0%, 1-10%, 11-25%, 26-50%, >50%) still produce positive contribution margin — and which are eroding profitability?"*
 
-**Xây dựng Khối phân tích SSAS OLAP Cube (Visual Studio 2022 theo giáo trình `Lab_SSAS.pdf`):**
-- [x] Khởi tạo dự án mới: `final/SSAS_OLAP_Project/Cube/`.
-- [x] Tạo **Data Source** kết nối tới `.\SQLEXPRESS` CSDL `EcommerceDW` (Service Account impersonation).
-- [x] Tạo **Data Source View (DSV)** chọn 8 Dim + Fact_Sales, chuẩn hóa FriendlyName (loại bỏ tiền tố `Fact_`, `Dim_`).
-- [x] Cấu hình **`Date.dim`**: Đổi thuộc tính Attribute Type sang Date/Calendar và thiết lập cây phân cấp **`Calendar`** (`Year` -> `Quarter Name` -> `Month Name` -> `Full Date`), cấu hình Attribute Relationships.
-- [ ] Tiếp tục cấu hình 7 Dimensions còn lại (`Product`, `Region`, `Marketing Campaign`, `Customer`, `Shipping`, `Order Profile`, `Return Profile`) cùng các phân cấp nghiệp vụ.
-- [ ] Xây dựng Cube (`Sales.cube`), cấu hình Measure Groups, Bus Matrix (Dimension Usage) và Calculated Members (Margin Rate, AOV, Discount Rate).
-- [ ] Deploy, Process và kiểm tra duyệt khối dữ liệu (Cube Browser trong Visual Studio / Excel PivotTable).
+**Decision supported:** Should we continue deep-discount campaigns (>50%)? Which product categories are most vulnerable to margin erosion?
 
----
+**Queries:** `03_Queries_SQL.sql` → BQ1-A, BQ1-B · `04_Queries_MDX.mdx` → MDX BQ1-A, BQ1-B, BQ1-C
 
-### 📋 KẾ HOẠCH BƯỚC TIẾP THEO (NEXT STEPS)
-
-1. **Xây dựng bộ truy vấn đa chiều MDX (`04_Queries_MDX.mdx`):**
-   - Viết 15 câu truy vấn MDX đối chiếu trực tiếp với 15 câu SQL sau khi hoàn tất khối Cube.
-2. **Đóng gói sản phẩm & Báo cáo cuối kỳ:**
-   - Chụp ảnh kết quả chạy ETL (tất cả task xanh).
-   - Chụp ảnh duyệt khối đa chiều (Cube Browser / Excel PivotTable) minh họa cho Chương 4.
-   - Hoàn thiện Báo cáo Word/PDF và Slide thuyết trình bảo vệ trước giảng viên.
+<!-- 📸 Chèn ảnh kết quả query BQ1-A: bảng Discount Tier vs Margin Rate % -->
+<!-- Ví dụ: nhóm >50% có margin_rate_pct thấp nhất → chứng minh giảm giá sâu không hiệu quả -->
+<!-- ![BQ1 - Discount vs Margin](docs/screenshots/bq1_discount_margin.png) -->
 
 ---
 
-## 📂 DANH MỤC TÀI LIỆU VÀ MÃ NGUỒN TRONG THƯ MỤC
+### ❓ BQ2 — Which customers are worth keeping? (RFM + CLV + Churn Risk)
+> *"At the latest monthly snapshot: which Platinum/Gold customers have high CLV but haven't purchased in 90+ days (churn risk)?"*
 
-| Tên File / Thư mục | Vai trò & Mô tả | Trạng thái |
+**Decision supported:** Which loyalty tier needs an immediate retention campaign? How to allocate the retention budget across Bronze → Platinum tiers?
+
+**Queries:** `03_Queries_SQL.sql` → BQ2-A, BQ2-B · `04_Queries_MDX.mdx` → MDX BQ2-A, BQ2-B, BQ2-C
+
+<!-- 📸 Chèn ảnh kết quả query BQ2-A: bảng Loyalty Tier × Churn Risk % × Avg CLV USD -->
+<!-- ![BQ2 - Churn Risk by Loyalty Tier](docs/screenshots/bq2_churn_clv.png) -->
+
+---
+
+### ❓ BQ3 — Which marketing channel has the best ROI?
+> *"Comparing Customer Acquisition Cost (CAC) vs First-Order Net Revenue by channel — which channel acquires the most valuable customers at the lowest cost?"*
+
+**Decision supported:** Where to shift next month's marketing budget? Which channel type (Paid Media / Owned / Organic) delivers sustainable ROI?
+
+**Queries:** `03_Queries_SQL.sql` → BQ3-A, BQ3-B · `04_Queries_MDX.mdx` → MDX BQ3-A, BQ3-B, BQ3-C
+
+<!-- 📸 Chèn ảnh kết quả query BQ3-A: bảng Marketing Channel × CAC × ROI Ratio -->
+<!-- ![BQ3 - Marketing ROI by Channel](docs/screenshots/bq3_marketing_roi.png) -->
+
+---
+
+
+
+| Fact Table | Rows | Description |
 |---|---|---|
-| [`ETL.sql`](ETL.sql) | Master script T-SQL thực thi trọn vẹn 5 giai đoạn ETL | ✅ Đã kiểm thử & chạy thành công |
-| [`00_Create_Staging_Tables.sql`](00_Create_Staging_Tables.sql) | DDL tạo 4 bảng Staging vùng đệm (`stg_*`) | ✅ Hoàn thành |
-| [`01_Create_EcommerceDW_v2.sql`](01_Create_EcommerceDW_v2.sql) | DDL tạo CSDL DWH chuẩn 8 Dim + 7 Fact | ✅ Hoàn thành |
-| [`02_ETL_EcommerceDW_v2.sql`](02_ETL_EcommerceDW_v2.sql) | Script ETL đối chiếu nguyên bản | ✅ Hoàn thành |
-| [`03_Queries_SQL.sql`](03_Queries_SQL.sql) | Bộ 15 câu truy vấn phân tích kinh doanh chuẩn Rubric | ✅ Đã kiểm thử 100% |
-| `04_Queries_MDX.mdx` | Bộ truy vấn đa chiều MDX trên SSAS Cube | ⏳ Đang xây dựng theo tiến độ Cube |
-| `SSAS_OLAP_Project/` | Thư mục chứa Solution SSAS Multidimensional Cube | 🔄 Đang triển khai thiết kế |
-| [`OUTLINE_DU_AN_DWH.txt`](OUTLINE_DU_AN_DWH.txt) | Đề cương chi tiết đối chiếu 6 tiêu chí Rubric đồ án | ✅ Đầy đủ |
-| [`Bao_Cao_Tien_Do_EcommerceDW_v2.docx`](Bao_Cao_Tien_Do_EcommerceDW_v2.docx) | Bản nháp báo cáo tiến độ môn học | ✅ Đầy đủ |
-| `du_lieu_csv/` | 4 file dữ liệu nguồn Kaggle | ✅ Đầy đủ |
-| `tai_lieu_tham_khao/` | Giáo trình `Lab_SSAS.pdf`, Rubric, Báo cáo mẫu | ✅ Đầy đủ |
+| `Fact_Sales` | **397,482** | Core transaction grain: 1 line-item per order |
+| `Fact_Order_Fulfillment` | 113,559 | Accumulating snapshot: delivery tracking |
+| `Fact_Customer_Snapshot` | 131,716 | Periodic snapshot: monthly RFM + loyalty tier |
+| `Fact_Customer_Feedback` | 113,559 | Customer review & sentiment per order |
+| `Fact_Customer_Acquisition` | 24,911 | First-event fact: CAC per new customer |
+| `Fact_Campaign_Promotion` | 14,986 | Coupon & promotion transaction fact |
+| `Fact_Return` | 9,462 | Return transaction fact |
+| **Total Net Revenue (USD)** | **~\$192M** | Multi-currency, normalized to USD |
 
 ---
 
-*Ghi chú: Toàn bộ quá trình thiết kế và hiện thực đều bám sát theo Rubric đánh giá đồ án môn học (thang điểm 100/100, chuẩn đầu ra Q1-Q4).*
+## Key Features
+
+### 1. Galaxy Schema — 9 Dimensions + 7 Facts
+
+| Category | Tables |
+|---|---|
+| **Core Facts** | Fact_Sales, Fact_Order_Fulfillment, Fact_Return |
+| **Strategic Facts** | Fact_Customer_Feedback, Fact_Customer_Acquisition, Fact_Customer_Snapshot, Fact_Campaign_Promotion |
+| **Dimensions** | Dim_Date (role-playing), Dim_Customer **(SCD Type 2)**, Dim_Product (SCD Type 1), Dim_Region, Dim_Shipping, Dim_Order_Profile **(Junk)**, Dim_Marketing_Campaign, Dim_Return_Profile, Dim_Currency |
+
+### 2. SSIS ETL Pipeline — 5-Container Design
+
+Architected a 5-container SSIS package with parallel CSV ingestion, SCD Type 2 customer upsert, 6-category error quarantine, and watermark-based incremental load — processing ~800K rows in a single batch run.
+
+| Container | Tasks | Pattern |
+|---|---|---|
+| **C00 — Prepare** | Truncate staging → Begin batch → Seed unknown keys + 7 FX rates | Sequential |
+| **C01 — Extract** | 4× Flat File → OLE DB Fast Load | **Parallel** |
+| **C02 — Quarantine** | Classify errors into `etl_reject` (NULL/TYPE/BUSINESS/ORPHAN/DUP/RANGE) | Sequential |
+| **C03 — Load Dims** | 7× Dim SP (SCD2 Customer, SCD1 Product, SCD0 others) | **Parallel** |
+| **C04 — Load Facts** | 7× Fact SP with TRY…CATCH isolation | **Parallel** |
+| **C05 — Close** | Update watermark → Close batch SUCCESS | Sequential |
+
+<!-- 📸 Chèn ảnh SSIS Package (tất cả containers xanh lá sau khi chạy xong) -->
+<!-- ![SSIS ETL Pipeline](docs/screenshots/ssis_package_success.png) -->
+
+### 3. Multi-Currency Support
+
+- **7 currencies:** USD, EUR, GBP, CAD, AUD, INR, AED
+- All monetary facts store **dual columns**: original amount + `_usd` normalized via `Dim_Currency.exchange_rate_to_usd`
+- Enables cross-country revenue aggregation in SSAS without data duplication
+
+### 4. SSAS — 4 Subject-Area OLAP Cubes
+
+| Cube | Measure Groups | Sample Calculated Measures |
+|---|---|---|
+| **Doanh thu & Bán hàng** | Fact_Sales, Fact_Return, Fact_Campaign | `Margin Rate %`, `Discount Rate %`, `Return Revenue Rate %`, `Coupon Usage Rate %` |
+| **Van hanh Logistics** | Fact_Order_Fulfillment | `Late Delivery Rate %`, `Avg Delivery Delay (days)` |
+| **Hanh vi Khach hang** | Fact_Feedback, Fact_Acquisition, Fact_Snapshot | `Average CAC USD`, `Negative Review Rate %`, `Points Redemption Rate %` |
+| **Tong hop Audit** | All 7 facts | Base measures — cross-fact reconciliation |
+
+<!-- 📸 Chèn ảnh SSAS Cube Browser hoặc Excel PivotTable kết nối đến cube -->
+<!-- ![SSAS Cube Browser](docs/screenshots/ssas_cube_browser.png) -->
+
+### 5. Near Real-Time Streaming Layer
+
+```
+stream_producer.py          stg_sales_stream          sp_Consume_MicroBatch
+─────────────────           ────────────────          ─────────────────────
+• Reads 138K CSV rows       • BIGINT stream_id        • Watermark: stream_id
+• Shuffles for realism      • DATETIME2(3) ingest_time  > last processed
+• Inserts in configurable   • is_processed BIT        • Marks batch → inserts
+  batches (default: 100)    • Partial index on          into Fact_Sales
+• Reports rows/sec stats      unprocessed rows        • Idempotent: NOT EXISTS
+                                                      • SQL Agent Job: every 30s
+```
+
+<!-- 📸 Chèn ảnh terminal Python hiển thị throughput (rows/sec) -->
+<!-- ![Stream Producer Output](docs/screenshots/stream_producer_output.png) -->
+
+---
+
+## Project Structure
+
+```
+ecomdw/
+├── 00_Create_Staging_Tables.sql    # Staging DDL — 4 stg_* buffer tables
+├── 01_Create_EcommerceDW_v2.sql    # DWH DDL — 9 Dims + 7 Facts + ETL metadata
+├── 02_Streaming_Setup.sql          # Streaming DDL — buffer table + SP + watermark
+├── stream_producer.py              # Python micro-batch event producer
+├── stream_consumer.py              # Python consumer / monitor
+├── du_lieu_csv/                    # Source data (4 CSV files)
+│   ├── ecommerce_sales_customer_analytics_150k.csv   # 138K orders
+│   ├── order_items.csv                               # 397K line-items
+│   ├── product_catalog.csv                           # 1.1K products
+│   └── customer_master.csv                           # 25K customers
+├── SSIS_ETL_Project/               # Visual Studio SSIS Package (.dtsx)
+└── SSAS_OLAP_Project/              # Visual Studio SSAS Project
+    └── Ecom/                       # 4 cubes (.cube) + 9 dims (.dim)
+```
+
+---
+
+## Setup & Run
+
+### Prerequisites
+- SQL Server 2019 + SSMS 18+
+- Visual Studio 2019/2022 with **SSIS** and **SSAS** extensions
+- Python 3.8+ with `pyodbc`
+
+### Steps
+
+```powershell
+# 1. Create DWH schema (run in SSMS in order)
+#    00_Create_Staging_Tables.sql
+#    01_Create_EcommerceDW_v2.sql
+#    02_Streaming_Setup.sql
+
+# 2. Run ETL pipeline
+#    Open SSIS_ETL_Project → Visual Studio → Run Package (F5)
+
+# 3. Deploy SSAS Cubes
+#    Open SSAS_OLAP_Project → Build → Deploy → Process Full
+
+# 4. Run streaming simulator
+pip install pyodbc
+python stream_producer.py --batch-size 100 --delay 0.5
+
+# Then consume in SSMS:
+# EXEC dbo.sp_Consume_MicroBatch @batch_size = 5000;
+# SELECT * FROM dbo.vw_Stream_Dashboard;
+```
+
+---
+
+## Sample Queries
+
+### SQL — Top Countries by Net Revenue
+
+```sql
+SELECT
+    r.country,
+    SUM(fs.net_revenue_usd)             AS net_revenue_usd,
+    ROUND(SUM(fs.contribution_margin_usd) * 100.0
+          / NULLIF(SUM(fs.net_revenue_usd), 0), 2) AS margin_rate_pct
+FROM dbo.Fact_Sales fs
+JOIN dbo.Dim_Region r ON fs.region_key = r.region_key
+GROUP BY r.country
+ORDER BY net_revenue_usd DESC;
+```
+
+### MDX — Margin Rate % by Country (SSAS)
+
+```mdx
+SELECT
+  {[Measures].[Net Revenue USD], [Measures].[Margin Rate %]} ON COLUMNS,
+  [Dim Region].[Country].[Country].MEMBERS ON ROWS
+FROM [Doanh Thu Ban Hang];
+```
+
+---
+
+## Skills Demonstrated
+
+| Area | Skills |
+|---|---|
+| **Data Modeling** | Kimball Galaxy Schema, SCD Type 1 & 2, Junk Dimension, Role-Playing Dimension, Degenerate Dimension |
+| **ETL Engineering** | SSIS parallel containers, error quarantine (6 categories), watermark incremental load, idempotent design |
+| **OLAP** | SSAS Multidimensional, MDX calculated members, subject-area cube decomposition |
+| **Streaming** | Micro-batch pattern, watermark timestamp, Python producer → T-SQL consumer |
+| **SQL** | T-SQL window functions, SCD2 MERGE, TRY…CATCH isolation, multi-currency normalization |
+| **Python** | pyodbc, csv.DictReader, argparse CLI, throughput monitoring |
+
+---
+
+## Dataset
+
+Source: [Kaggle — E-Commerce Sales & Customer Analytics](https://www.kaggle.com) *(update link here)*
+
+> 138,117 orders · 397,482 line-items · 25,000 customers · 1,175 products · 2021–2025 · 7 countries · 7 currencies
