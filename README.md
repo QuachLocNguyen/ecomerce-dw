@@ -14,18 +14,18 @@
 
 ```
 ┌──────────────────────────────────────────────────────────────────┐
-│  SOURCE                 STAGING              DWH                  │
+│  SOURCE                 STAGING              DWH                 │
 │  4 CSV files      →     4 stg_* tables  →   9 Dimensions         │
-│  138K orders            (SQL Server)         7 Fact Tables        │
-│  397K line-items                             EcommerceDW          │
-│  25K customers                                                     │
-│  1.1K products                                   ↓                │
-│                                             SSAS OLAP             │
-│                                             4 Subject Cubes       │
+│  138K orders            (SQL Server)         7 Fact Tables       │
+│  397K line-items                             EcommerceDW         │
+│  25K customers                                                   │
+│  1.1K products                                   ↓               │
+│                                             SSAS OLAP            │
+│                                             4 Subject Cubes      │
 ├──────────────────────────────────────────────────────────────────┤
-│  STREAMING LAYER (Near Real-Time)                                  │
+│  STREAMING LAYER (Near Real-Time)                                │
 │  stream_producer.py → stg_sales_stream → sp_Consume_MicroBatch   │
-│  (Python pyodbc)       (watermark buffer)   (SQL Agent, 30s)      │
+│  (Python pyodbc)       (watermark buffer)   (SQL Agent, 30s)     │
 └──────────────────────────────────────────────────────────────────┘
 ```
 
