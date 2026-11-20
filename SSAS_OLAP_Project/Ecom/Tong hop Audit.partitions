@@ -1,0 +1,145 @@
+﻿<Cube xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ddl2="http://schemas.microsoft.com/analysisservices/2003/engine/2" xmlns:ddl2_2="http://schemas.microsoft.com/analysisservices/2003/engine/2/2" xmlns:ddl100_100="http://schemas.microsoft.com/analysisservices/2008/engine/100/100" xmlns:ddl200="http://schemas.microsoft.com/analysisservices/2010/engine/200" xmlns:ddl200_200="http://schemas.microsoft.com/analysisservices/2010/engine/200/200" xmlns:ddl300="http://schemas.microsoft.com/analysisservices/2011/engine/300" xmlns:ddl300_300="http://schemas.microsoft.com/analysisservices/2011/engine/300/300" xmlns:ddl400="http://schemas.microsoft.com/analysisservices/2012/engine/400" xmlns:ddl400_400="http://schemas.microsoft.com/analysisservices/2012/engine/400/400" xmlns:ddl500="http://schemas.microsoft.com/analysisservices/2013/engine/500" xmlns:ddl500_500="http://schemas.microsoft.com/analysisservices/2013/engine/500/500" xmlns:dwd="http://schemas.microsoft.com/DataWarehouse/Designer/1.0" dwd:design-time-name="8ea10889-a55e-4226-a877-58a08bb1e5a4" xmlns="http://schemas.microsoft.com/analysisservices/2003/engine">
+  <ID>Tong hop Audit</ID>
+  <MeasureGroups>
+    <MeasureGroup>
+      <ID>Fact Sales</ID>
+      <Partitions>
+        <Partition dwd:design-time-name="28662b0b-3822-4ab2-ba59-e8f7c54bbb80">
+          <ID>Fact Sales</ID>
+          <Name>Fact Sales</Name>
+          <CreatedTimestamp>0001-01-01T00:00:00Z</CreatedTimestamp>
+          <LastSchemaUpdate>0001-01-01T00:00:00Z</LastSchemaUpdate>
+          <LastProcessed>0001-01-01T00:00:00Z</LastProcessed>
+          <State>Unprocessed</State>
+          <Source xsi:type="DsvTableBinding" dwd:design-time-name="f72f3aed-2ebc-4bc2-9aca-cdf7dec9d76d">
+            <DataSourceViewID>Ecommerce DW</DataSourceViewID>
+            <TableID>dbo_Fact_Sales</TableID>
+          </Source>
+          <StorageMode>Molap</StorageMode>
+          <CurrentStorageMode>Molap</CurrentStorageMode>
+          <ProcessingMode>Regular</ProcessingMode>
+        </Partition>
+      </Partitions>
+    </MeasureGroup>
+    <MeasureGroup>
+      <ID>Fact Order Fulfillment</ID>
+      <Partitions>
+        <Partition dwd:design-time-name="db89ca05-2079-41f7-bd3a-357e64597de6">
+          <ID>Fact Order Fulfillment</ID>
+          <Name>Fact Order Fulfillment</Name>
+          <CreatedTimestamp>0001-01-01T00:00:00Z</CreatedTimestamp>
+          <LastSchemaUpdate>0001-01-01T00:00:00Z</LastSchemaUpdate>
+          <LastProcessed>0001-01-01T00:00:00Z</LastProcessed>
+          <State>Unprocessed</State>
+          <Source xsi:type="DsvTableBinding" dwd:design-time-name="cbb19c78-6720-464f-ac58-d19c04bf53c3">
+            <DataSourceViewID>Ecommerce DW</DataSourceViewID>
+            <TableID>dbo_Fact_Order_Fulfillment</TableID>
+          </Source>
+          <StorageMode>Molap</StorageMode>
+          <CurrentStorageMode>Molap</CurrentStorageMode>
+          <ProcessingMode>Regular</ProcessingMode>
+        </Partition>
+      </Partitions>
+    </MeasureGroup>
+    <MeasureGroup>
+      <ID>Fact Return</ID>
+      <Partitions>
+        <Partition dwd:design-time-name="9c118148-fa56-420b-8488-0d06d3186e1e">
+          <ID>Fact Return</ID>
+          <Name>Fact Return</Name>
+          <CreatedTimestamp>0001-01-01T00:00:00Z</CreatedTimestamp>
+          <LastSchemaUpdate>0001-01-01T00:00:00Z</LastSchemaUpdate>
+          <LastProcessed>0001-01-01T00:00:00Z</LastProcessed>
+          <State>Unprocessed</State>
+          <Source xsi:type="DsvTableBinding" dwd:design-time-name="13199503-c0d7-4f0c-9e39-ced888acf3b6">
+            <DataSourceViewID>Ecommerce DW</DataSourceViewID>
+            <TableID>dbo_Fact_Return</TableID>
+          </Source>
+          <StorageMode>Molap</StorageMode>
+          <CurrentStorageMode>Molap</CurrentStorageMode>
+          <ProcessingMode>Regular</ProcessingMode>
+        </Partition>
+      </Partitions>
+    </MeasureGroup>
+    <MeasureGroup>
+      <ID>Fact Customer Acquisition</ID>
+      <Partitions>
+        <Partition dwd:design-time-name="3177b593-4072-4c1f-af01-882faab1c5f0">
+          <ID>Fact Customer Acquisition</ID>
+          <Name>Fact Customer Acquisition</Name>
+          <CreatedTimestamp>0001-01-01T00:00:00Z</CreatedTimestamp>
+          <LastSchemaUpdate>0001-01-01T00:00:00Z</LastSchemaUpdate>
+          <LastProcessed>0001-01-01T00:00:00Z</LastProcessed>
+          <State>Unprocessed</State>
+          <Source xsi:type="DsvTableBinding" dwd:design-time-name="b2ec32ee-e17b-4933-bbd4-36c8938ba976">
+            <DataSourceViewID>Ecommerce DW</DataSourceViewID>
+            <TableID>dbo_Fact_Customer_Acquisition</TableID>
+          </Source>
+          <StorageMode>Molap</StorageMode>
+          <CurrentStorageMode>Molap</CurrentStorageMode>
+          <ProcessingMode>Regular</ProcessingMode>
+        </Partition>
+      </Partitions>
+    </MeasureGroup>
+    <MeasureGroup>
+      <ID>Fact Campaign Promotion</ID>
+      <Partitions>
+        <Partition dwd:design-time-name="5df812bc-6e0a-4357-affa-98e6ee8f44e6">
+          <ID>Fact Campaign Promotion</ID>
+          <Name>Fact Campaign Promotion</Name>
+          <CreatedTimestamp>0001-01-01T00:00:00Z</CreatedTimestamp>
+          <LastSchemaUpdate>0001-01-01T00:00:00Z</LastSchemaUpdate>
+          <LastProcessed>0001-01-01T00:00:00Z</LastProcessed>
+          <State>Unprocessed</State>
+          <Source xsi:type="DsvTableBinding" dwd:design-time-name="40ef50ed-0103-4039-86fd-4f4143a5120f">
+            <DataSourceViewID>Ecommerce DW</DataSourceViewID>
+            <TableID>dbo_Fact_Campaign_Promotion</TableID>
+          </Source>
+          <StorageMode>Molap</StorageMode>
+          <CurrentStorageMode>Molap</CurrentStorageMode>
+          <ProcessingMode>Regular</ProcessingMode>
+        </Partition>
+      </Partitions>
+    </MeasureGroup>
+    <MeasureGroup>
+      <ID>Fact Customer Snapshot</ID>
+      <Partitions>
+        <Partition dwd:design-time-name="494f3fe2-69d1-480a-9bf7-92b02f8676f0">
+          <ID>Fact Customer Snapshot</ID>
+          <Name>Fact Customer Snapshot</Name>
+          <CreatedTimestamp>0001-01-01T00:00:00Z</CreatedTimestamp>
+          <LastSchemaUpdate>0001-01-01T00:00:00Z</LastSchemaUpdate>
+          <LastProcessed>0001-01-01T00:00:00Z</LastProcessed>
+          <State>Unprocessed</State>
+          <Source xsi:type="DsvTableBinding" dwd:design-time-name="97daf276-c4cd-46c2-8f23-5d487a727200">
+            <DataSourceViewID>Ecommerce DW</DataSourceViewID>
+            <TableID>dbo_Fact_Customer_Snapshot</TableID>
+          </Source>
+          <StorageMode>Molap</StorageMode>
+          <CurrentStorageMode>Molap</CurrentStorageMode>
+          <ProcessingMode>Regular</ProcessingMode>
+        </Partition>
+      </Partitions>
+    </MeasureGroup>
+    <MeasureGroup>
+      <ID>Fact Customer Feedback</ID>
+      <Partitions>
+        <Partition dwd:design-time-name="191ba0e4-0ee1-4d14-a7b9-e0a3e3cf2046">
+          <ID>Fact Customer Feedback</ID>
+          <Name>Fact Customer Feedback</Name>
+          <CreatedTimestamp>0001-01-01T00:00:00Z</CreatedTimestamp>
+          <LastSchemaUpdate>0001-01-01T00:00:00Z</LastSchemaUpdate>
+          <LastProcessed>0001-01-01T00:00:00Z</LastProcessed>
+          <State>Unprocessed</State>
+          <Source xsi:type="DsvTableBinding" dwd:design-time-name="f874805c-7b35-43fb-93a7-959291f1a2db">
+            <DataSourceViewID>Ecommerce DW</DataSourceViewID>
+            <TableID>dbo_Fact_Customer_Feedback</TableID>
+          </Source>
+          <StorageMode>Molap</StorageMode>
+          <CurrentStorageMode>Molap</CurrentStorageMode>
+          <ProcessingMode>Regular</ProcessingMode>
+        </Partition>
+      </Partitions>
+    </MeasureGroup>
+  </MeasureGroups>
+</Cube>

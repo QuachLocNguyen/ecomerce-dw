@@ -1,0 +1,65 @@
+﻿<Cube xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ddl2="http://schemas.microsoft.com/analysisservices/2003/engine/2" xmlns:ddl2_2="http://schemas.microsoft.com/analysisservices/2003/engine/2/2" xmlns:ddl100_100="http://schemas.microsoft.com/analysisservices/2008/engine/100/100" xmlns:ddl200="http://schemas.microsoft.com/analysisservices/2010/engine/200" xmlns:ddl200_200="http://schemas.microsoft.com/analysisservices/2010/engine/200/200" xmlns:ddl300="http://schemas.microsoft.com/analysisservices/2011/engine/300" xmlns:ddl300_300="http://schemas.microsoft.com/analysisservices/2011/engine/300/300" xmlns:ddl400="http://schemas.microsoft.com/analysisservices/2012/engine/400" xmlns:ddl400_400="http://schemas.microsoft.com/analysisservices/2012/engine/400/400" xmlns:ddl500="http://schemas.microsoft.com/analysisservices/2013/engine/500" xmlns:ddl500_500="http://schemas.microsoft.com/analysisservices/2013/engine/500/500" xmlns:dwd="http://schemas.microsoft.com/DataWarehouse/Designer/1.0" dwd:design-time-name="7ce72403-d121-45e5-a5b8-d20bba47efd4" xmlns="http://schemas.microsoft.com/analysisservices/2003/engine">
+  <ID>Hanh vi khach hang</ID>
+  <MeasureGroups>
+    <MeasureGroup>
+      <ID>Fact Customer Acquisition</ID>
+      <Partitions>
+        <Partition dwd:design-time-name="1358c9ca-e0f8-4beb-b974-e8e8baf0a4a0">
+          <ID>Fact Customer Acquisition</ID>
+          <Name>Fact Customer Acquisition</Name>
+          <CreatedTimestamp>0001-01-01T00:00:00Z</CreatedTimestamp>
+          <LastSchemaUpdate>0001-01-01T00:00:00Z</LastSchemaUpdate>
+          <LastProcessed>0001-01-01T00:00:00Z</LastProcessed>
+          <State>Unprocessed</State>
+          <Source xsi:type="DsvTableBinding" dwd:design-time-name="22814fb2-b1e3-462e-86a6-6d3dee07a5ab">
+            <DataSourceViewID>Ecommerce DW</DataSourceViewID>
+            <TableID>dbo_Fact_Customer_Acquisition</TableID>
+          </Source>
+          <StorageMode>Molap</StorageMode>
+          <CurrentStorageMode>Molap</CurrentStorageMode>
+          <ProcessingMode>Regular</ProcessingMode>
+        </Partition>
+      </Partitions>
+    </MeasureGroup>
+    <MeasureGroup>
+      <ID>Fact Customer Feedback</ID>
+      <Partitions>
+        <Partition dwd:design-time-name="f4a0af8d-3656-419b-8d90-8943723e0170">
+          <ID>Fact Customer Feedback</ID>
+          <Name>Fact Customer Feedback</Name>
+          <CreatedTimestamp>0001-01-01T00:00:00Z</CreatedTimestamp>
+          <LastSchemaUpdate>0001-01-01T00:00:00Z</LastSchemaUpdate>
+          <LastProcessed>0001-01-01T00:00:00Z</LastProcessed>
+          <State>Unprocessed</State>
+          <Source xsi:type="DsvTableBinding" dwd:design-time-name="54a321c1-d794-4123-ba94-1097c8f2f443">
+            <DataSourceViewID>Ecommerce DW</DataSourceViewID>
+            <TableID>dbo_Fact_Customer_Feedback</TableID>
+          </Source>
+          <StorageMode>Molap</StorageMode>
+          <CurrentStorageMode>Molap</CurrentStorageMode>
+          <ProcessingMode>Regular</ProcessingMode>
+        </Partition>
+      </Partitions>
+    </MeasureGroup>
+    <MeasureGroup>
+      <ID>Fact Customer Snapshot</ID>
+      <Partitions>
+        <Partition dwd:design-time-name="ed626ee2-80cb-42de-9576-05d32cacad96">
+          <ID>Fact Customer Snapshot</ID>
+          <Name>Fact Customer Snapshot</Name>
+          <CreatedTimestamp>0001-01-01T00:00:00Z</CreatedTimestamp>
+          <LastSchemaUpdate>0001-01-01T00:00:00Z</LastSchemaUpdate>
+          <LastProcessed>0001-01-01T00:00:00Z</LastProcessed>
+          <State>Unprocessed</State>
+          <Source xsi:type="DsvTableBinding" dwd:design-time-name="45b86384-2459-4318-85fd-8a1803eaea13">
+            <DataSourceViewID>Ecommerce DW</DataSourceViewID>
+            <TableID>dbo_Fact_Customer_Snapshot</TableID>
+          </Source>
+          <StorageMode>Molap</StorageMode>
+          <CurrentStorageMode>Molap</CurrentStorageMode>
+          <ProcessingMode>Regular</ProcessingMode>
+        </Partition>
+      </Partitions>
+    </MeasureGroup>
+  </MeasureGroups>
+</Cube>

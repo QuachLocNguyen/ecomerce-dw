@@ -1,0 +1,182 @@
+﻿<Dimension xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ddl2="http://schemas.microsoft.com/analysisservices/2003/engine/2" xmlns:ddl2_2="http://schemas.microsoft.com/analysisservices/2003/engine/2/2" xmlns:ddl100_100="http://schemas.microsoft.com/analysisservices/2008/engine/100/100" xmlns:ddl200="http://schemas.microsoft.com/analysisservices/2010/engine/200" xmlns:ddl200_200="http://schemas.microsoft.com/analysisservices/2010/engine/200/200" xmlns:ddl300="http://schemas.microsoft.com/analysisservices/2011/engine/300" xmlns:ddl300_300="http://schemas.microsoft.com/analysisservices/2011/engine/300/300" xmlns:ddl400="http://schemas.microsoft.com/analysisservices/2012/engine/400" xmlns:ddl400_400="http://schemas.microsoft.com/analysisservices/2012/engine/400/400" xmlns:ddl500="http://schemas.microsoft.com/analysisservices/2013/engine/500" xmlns:ddl500_500="http://schemas.microsoft.com/analysisservices/2013/engine/500/500" xmlns:dwd="http://schemas.microsoft.com/DataWarehouse/Designer/1.0" dwd:design-time-name="61488ff8-409d-41ea-b980-5f63112a8720" xmlns="http://schemas.microsoft.com/analysisservices/2003/engine">
+  <ID>Dim Marketing Campaign</ID>
+  <Name>Dim Marketing Campaign</Name>
+  <CreatedTimestamp>0001-01-01T00:00:00Z</CreatedTimestamp>
+  <LastSchemaUpdate>0001-01-01T00:00:00Z</LastSchemaUpdate>
+  <Annotations>
+    <Annotation>
+      <Name>http://schemas.microsoft.com/DataWarehouse/Designer/1.0:DiagramLayout</Name>
+    </Annotation>
+    <Annotation>
+      <Name>http://schemas.microsoft.com/DataWarehouse/Designer/1.0:ShowFriendlyNames</Name>
+      <Value>true</Value>
+    </Annotation>
+    <Annotation>
+      <Name>http://schemas.microsoft.com/DataWarehouse/Designer/1.0:ShowRelationshipNames</Name>
+      <Value>false</Value>
+    </Annotation>
+    <Annotation>
+      <Name>http://schemas.microsoft.com/DataWarehouse/Designer/1.0:UseDiagramDefaultLayout</Name>
+      <Value>true</Value>
+    </Annotation>
+    <Annotation>
+      <Name>http://schemas.microsoft.com/DataWarehouse/Designer/1.0:DiagramViewPortLeft</Name>
+      <Value>0</Value>
+    </Annotation>
+    <Annotation>
+      <Name>http://schemas.microsoft.com/DataWarehouse/Designer/1.0:DiagramViewPortTop</Name>
+      <Value>0</Value>
+    </Annotation>
+    <Annotation>
+      <Name>http://schemas.microsoft.com/DataWarehouse/Designer/1.0:DiagramBoundingLeft</Name>
+      <Value>0</Value>
+    </Annotation>
+    <Annotation>
+      <Name>http://schemas.microsoft.com/DataWarehouse/Designer/1.0:DiagramBoundingTop</Name>
+      <Value>0</Value>
+    </Annotation>
+    <Annotation>
+      <Name>http://schemas.microsoft.com/DataWarehouse/Designer/1.0:DiagramZoom</Name>
+      <Value>100</Value>
+    </Annotation>
+  </Annotations>
+  <LastProcessed>0001-01-01T00:00:00Z</LastProcessed>
+  <State>Unprocessed</State>
+  <Source xsi:type="DataSourceViewBinding" dwd:design-time-name="bd3f5e9e-50d2-4fa7-8b1c-cd52112f0df5">
+    <DataSourceViewID>Ecommerce DW</DataSourceViewID>
+  </Source>
+  <UnknownMember>Visible</UnknownMember>
+  <ErrorConfiguration dwd:design-time-name="a78f5622-4b02-4843-add9-34343ecf6aed">
+    <KeyNotFound>ReportAndStop</KeyNotFound>
+    <KeyDuplicate>ReportAndStop</KeyDuplicate>
+    <NullKeyNotAllowed>ReportAndStop</NullKeyNotAllowed>
+  </ErrorConfiguration>
+  <CurrentStorageMode>Molap</CurrentStorageMode>
+  <Attributes>
+    <Attribute dwd:design-time-name="285f23c5-0d79-42f9-887d-28f2418cd784">
+      <ID>Marketing Key</ID>
+      <Name>Marketing Key</Name>
+      <Usage>Key</Usage>
+      <KeyColumns>
+        <KeyColumn dwd:design-time-name="ca807409-e007-49cc-af8e-59fdd114ce9b">
+          <DataType>Integer</DataType>
+          <NullProcessing>UnknownMember</NullProcessing>
+          <Source xsi:type="ColumnBinding" dwd:design-time-name="5912bb5c-9baa-4632-947e-c5064b4b0d88">
+            <TableID>dbo_Dim_Marketing_Campaign</TableID>
+            <ColumnID>marketing_key</ColumnID>
+          </Source>
+        </KeyColumn>
+      </KeyColumns>
+      <AttributeRelationships>
+        <AttributeRelationship dwd:design-time-name="edbbbc46-1a38-4031-b4c2-7dc7cec75629">
+          <AttributeID>Marketing Channel</AttributeID>
+          <Name>Marketing Channel</Name>
+        </AttributeRelationship>
+        <AttributeRelationship dwd:design-time-name="56de3d9c-c75d-4a09-b67a-3171f12d6d13">
+          <AttributeID>Campaign Name</AttributeID>
+          <Name>Campaign Name</Name>
+        </AttributeRelationship>
+        <AttributeRelationship dwd:design-time-name="976c42e2-3d6f-4103-a729-99c2fc39d250">
+          <AttributeID>Coupon Code</AttributeID>
+          <Name>Coupon Code</Name>
+        </AttributeRelationship>
+        <AttributeRelationship dwd:design-time-name="4ab85dd0-4c3a-4428-abeb-a9b2062312f0">
+          <AttributeID>Has Coupon Flag</AttributeID>
+          <Name>Has Coupon Flag</Name>
+        </AttributeRelationship>
+        <AttributeRelationship dwd:design-time-name="4b64c07d-361c-4188-9795-e4b3b71baa5e">
+          <AttributeID>Channel Type</AttributeID>
+          <Name>Channel Type</Name>
+        </AttributeRelationship>
+      </AttributeRelationships>
+      <OrderBy>Key</OrderBy>
+      <ddl200:ProcessingState>Unprocessed</ddl200:ProcessingState>
+      <ddl300:AttributeHierarchyProcessingState>Unprocessed</ddl300:AttributeHierarchyProcessingState>
+    </Attribute>
+    <Attribute dwd:design-time-name="0e0179b5-9e41-4000-bb4c-151600e3db40">
+      <ID>Marketing Channel</ID>
+      <Name>Marketing Channel</Name>
+      <KeyColumns>
+        <KeyColumn dwd:design-time-name="96f44487-2c0e-4b04-99bb-ef4f33c2d0eb">
+          <DataType>WChar</DataType>
+          <DataSize>100</DataSize>
+          <Source xsi:type="ColumnBinding" dwd:design-time-name="8d9bc013-2af2-42a6-9a2c-49fdd85a8d3b">
+            <TableID>dbo_Dim_Marketing_Campaign</TableID>
+            <ColumnID>marketing_channel</ColumnID>
+          </Source>
+        </KeyColumn>
+      </KeyColumns>
+      <OrderBy>Key</OrderBy>
+      <ddl200:ProcessingState>Unprocessed</ddl200:ProcessingState>
+      <ddl300:AttributeHierarchyProcessingState>Unprocessed</ddl300:AttributeHierarchyProcessingState>
+    </Attribute>
+    <Attribute dwd:design-time-name="1e806b6b-aaf6-4c6d-9207-74ffe3804ef2">
+      <ID>Campaign Name</ID>
+      <Name>Campaign Name</Name>
+      <KeyColumns>
+        <KeyColumn dwd:design-time-name="099f8df3-db8c-40ba-831d-b0ef62a764f9">
+          <DataType>WChar</DataType>
+          <DataSize>150</DataSize>
+          <Source xsi:type="ColumnBinding" dwd:design-time-name="c74cde06-898c-42e5-9959-ea357ff09517">
+            <TableID>dbo_Dim_Marketing_Campaign</TableID>
+            <ColumnID>campaign_name</ColumnID>
+          </Source>
+        </KeyColumn>
+      </KeyColumns>
+      <OrderBy>Key</OrderBy>
+      <ddl200:ProcessingState>Unprocessed</ddl200:ProcessingState>
+      <ddl300:AttributeHierarchyProcessingState>Unprocessed</ddl300:AttributeHierarchyProcessingState>
+    </Attribute>
+    <Attribute dwd:design-time-name="46895185-1e49-42ab-89a3-a36a79d102d5">
+      <ID>Coupon Code</ID>
+      <Name>Coupon Code</Name>
+      <KeyColumns>
+        <KeyColumn dwd:design-time-name="b3072ebc-40a2-4676-bac9-dfa57db94e56">
+          <DataType>WChar</DataType>
+          <DataSize>50</DataSize>
+          <Source xsi:type="ColumnBinding" dwd:design-time-name="a463607e-827a-40ae-88c7-745e3495000c">
+            <TableID>dbo_Dim_Marketing_Campaign</TableID>
+            <ColumnID>coupon_code</ColumnID>
+          </Source>
+        </KeyColumn>
+      </KeyColumns>
+      <OrderBy>Key</OrderBy>
+      <ddl200:ProcessingState>Unprocessed</ddl200:ProcessingState>
+      <ddl300:AttributeHierarchyProcessingState>Unprocessed</ddl300:AttributeHierarchyProcessingState>
+    </Attribute>
+    <Attribute dwd:design-time-name="19c2cecd-c819-43e0-8340-2daf3a8cd66c">
+      <ID>Has Coupon Flag</ID>
+      <Name>Has Coupon Flag</Name>
+      <KeyColumns>
+        <KeyColumn dwd:design-time-name="8eac5990-8afe-468f-8c36-86582fd5f06b">
+          <DataType>Boolean</DataType>
+          <Source xsi:type="ColumnBinding" dwd:design-time-name="34c3038a-ea68-4e3c-97c2-23015d21e4c7">
+            <TableID>dbo_Dim_Marketing_Campaign</TableID>
+            <ColumnID>has_coupon_flag</ColumnID>
+          </Source>
+        </KeyColumn>
+      </KeyColumns>
+      <OrderBy>Key</OrderBy>
+      <ddl200:ProcessingState>Unprocessed</ddl200:ProcessingState>
+      <ddl300:AttributeHierarchyProcessingState>Unprocessed</ddl300:AttributeHierarchyProcessingState>
+    </Attribute>
+    <Attribute dwd:design-time-name="54f918e2-d680-4cb5-a13a-7397a7dca0da">
+      <ID>Channel Type</ID>
+      <Name>Channel Type</Name>
+      <KeyColumns>
+        <KeyColumn dwd:design-time-name="3216f842-a819-4bff-9881-5748995a43f0">
+          <DataType>WChar</DataType>
+          <DataSize>50</DataSize>
+          <Source xsi:type="ColumnBinding" dwd:design-time-name="ec7cde89-79c0-434a-a1a6-de2c76dcee8b">
+            <TableID>dbo_Dim_Marketing_Campaign</TableID>
+            <ColumnID>channel_type</ColumnID>
+          </Source>
+        </KeyColumn>
+      </KeyColumns>
+      <OrderBy>Key</OrderBy>
+      <ddl200:ProcessingState>Unprocessed</ddl200:ProcessingState>
+      <ddl300:AttributeHierarchyProcessingState>Unprocessed</ddl300:AttributeHierarchyProcessingState>
+    </Attribute>
+  </Attributes>
+  <ddl300:ProcessingState>Unprocessed</ddl300:ProcessingState>
+</Dimension>
